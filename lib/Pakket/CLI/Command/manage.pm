@@ -35,6 +35,7 @@ my %commands = map +( $_ => 1 ), qw<
     show-package
     remove-parcel
     add-deps
+    remove-deps
     list-deps
     list-specs
     list-sources
