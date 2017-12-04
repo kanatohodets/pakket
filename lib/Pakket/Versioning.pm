@@ -3,6 +3,7 @@ package Pakket::Versioning;
 
 use Moose;
 use MooseX::StrictConstructor;
+use Pakket::Types;
 use Carp            qw< croak >;
 use Log::Any        qw< $log >;
 use Module::Runtime qw< require_module >;
