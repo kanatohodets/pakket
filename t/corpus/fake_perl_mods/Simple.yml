@@ -1,0 +1,5 @@
+---
+name: Simple
+abstract: Simple stuff
+requires:
+    Inner: 1.000
