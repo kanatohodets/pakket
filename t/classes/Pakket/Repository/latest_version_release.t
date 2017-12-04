@@ -1,7 +1,7 @@
 ## no critic
 use strict;
 use warnings;
-use Test::More 'tests' => 5;
+use Test::More 'tests' => 6;
 use Pakket::Package;
 use Pakket::Repository::Spec;
 use lib '.'; use t::lib::Utils;
@@ -21,7 +21,6 @@ subtest 'Setup' => sub {
     );
 };
 
-# FIXME: Add release test too
 my @versions = qw<
     1.0
     1.2
@@ -84,4 +83,35 @@ subtest 'Find latest versions (with range and NOT)' => sub {
     );
 
     is_deeply( $ver_rel, [ '2.0', '1' ], 'Latest version and release' );
+};
+
+subtest 'Find latest versions (with different releases)' => sub {
+    # Add a few more versions that have different releases
+    $repo->remove_package_spec(
+        Pakket::Package->new(
+            'name'     => 'My-Package',
+            'category' => 'perl',
+            'version'  => $_,
+            'release'  => 1,
+        ),
+    ) for @versions;
+
+    is_deeply( $repo->all_object_ids, [], 'Cleaned up repo' );
+
+    $repo->store_package_spec(
+        Pakket::Package->new(
+            'name'     => 'My-Package',
+            'category' => 'perl',
+            'version'  => $_->[0],
+            'release'  => $_->[1],
+        ),
+    ) for ( [ '1.0', 1 ], [ '2.0', 2 ], [ '2.0', 1 ] );
+
+    is( scalar @{ $repo->all_object_ids }, 3, 'Added three pakages' );
+
+    my ($ver_rel) = $repo->latest_version_release(
+        'perl', 'My-Package', '>= 2.0',
+    );
+
+    is_deeply( $ver_rel, [ '2.0', '2' ], 'Latest version and release' );
 };
