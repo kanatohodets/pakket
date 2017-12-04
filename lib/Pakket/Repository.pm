@@ -85,9 +85,9 @@ sub latest_version_release {
         'native' => 'Perl',
     );
 
-    my @versions;
+    my %versions;
     foreach my $object_id ( @{ $self->all_object_ids } ) {
-        my ( $my_category, $my_name, $my_version ) =
+        my ( $my_category, $my_name, $my_version, $my_release ) =
             $object_id =~ PAKKET_PACKAGE_SPEC();
 
         # Ignore what is not ours
@@ -95,21 +95,27 @@ sub latest_version_release {
             or next;
 
         # Add the version
-        push @versions, $my_version;
+        push @{ $versions{$my_version} }, $my_release;
     }
 
     my $versioner = Pakket::Versioning->new(
         'type' => $types{$category},
     );
 
-    my $latest_version = $versioner->latest( $category, $name, $req_string, @versions );
-    $latest_version
-        and return [ $latest_version, 1 ];
+    my $latest_version = $versioner->latest(
+        $category, $name, $req_string, keys %versions,
+    ) or Carp::croak(
+        $log->criticalf(
+            'Could not analyze %s/%s to find latest version', $category,
+            $name,
+        ),
+    );
 
-    Carp::croak( $log->criticalf(
-        'Could not analyze %s/%s to find latest version',
-        $category, $name,
-    ) );
+    # return the latest version and latest release available for this version
+    return [
+        $latest_version,
+        ( sort @{ $versions{$latest_version} } )[-1],
+    ];
 }
 
 sub freeze_location {
