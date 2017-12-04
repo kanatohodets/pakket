@@ -108,7 +108,7 @@ has 'installer_cache' => (
 has 'bootstrapping' => (
     'is'      => 'ro',
     'isa'     => 'Bool',
-    'default' => 1,
+    'default' => sub {1},
 );
 
 has 'requirements' => (
