@@ -29,12 +29,6 @@ with qw<
     Pakket::Role::HasParcelRepo
 >;
 
-has 'files_manifest' => (
-    'is'      => 'ro',
-    'isa'     => 'HashRef',
-    'default' => sub { return +{} },
-);
-
 # TODO
 # The reason behind this is to make sure we already inflate
 # the Parcel Repo before using it, because we might chdir
