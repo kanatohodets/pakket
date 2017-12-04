@@ -334,7 +334,7 @@ strict = 0
 
 # What about constant subroutines? sub MYSUB() {0}
 [ValuesAndExpressions::ProhibitMagicNumbers]
-# allowed_values = 0 1 2
+allowed_values = 0 1 2 -1
 # Kind of literals to allow.
 # Valid values: Binary, Exp, Float, Hex, Octal.
 # allowed_types = Float
