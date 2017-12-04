@@ -4,7 +4,7 @@ use warnings;
 use Test::More 'tests' => 5;
 use Pakket::Package;
 use Pakket::Repository::Spec;
-use t::lib::Utils;
+use lib '.'; use t::lib::Utils;
 
 my $config = t::lib::Utils::config();
 my $repo;
