@@ -22,7 +22,16 @@ subtest 'Setup' => sub {
 };
 
 # FIXME: Add release test too
-my @versions = qw< 1.0 1.2 1.2.1 1.2.2 1.2.3 2.0 2.0.1 3.1 >;
+my @versions = qw<
+    1.0
+    1.2
+    1.2.1
+    1.2.2
+    1.2.3
+    2.0
+    2.0.1
+    3.1
+>;
 
 subtest 'Add packages' => sub {
     foreach my $version (@versions) {
@@ -41,13 +50,13 @@ subtest 'Add packages' => sub {
         \@all_objects,
         [
             'perl/My-Package=1.0:1',
-            'perl/My-Package=1.2.1:1',
-            'perl/My-Package=1.2.2:1',
-            'perl/My-Package=1.2.3:1',
             'perl/My-Package=1.2:1',
-            'perl/My-Package=2.0.1:1',
             'perl/My-Package=2.0:1',
             'perl/My-Package=3.1:1',
+            'perl/My-Package=v1.2.1:1',
+            'perl/My-Package=v1.2.2:1',
+            'perl/My-Package=v1.2.3:1',
+            'perl/My-Package=v2.0.1:1',
         ],
         'All packages added correctly',
     );
@@ -66,7 +75,7 @@ subtest 'Find latest versions (with range)' => sub {
         'perl', 'My-Package', '>= 2.0, < 3.0',
     );
 
-    is_deeply( $ver_rel, [ '2.0.1', '1' ], 'Latest version and release' );
+    is_deeply( $ver_rel, [ 'v2.0.1', '1' ], 'Latest version and release' );
 };
 
 subtest 'Find latest versions (with range and NOT)' => sub {
