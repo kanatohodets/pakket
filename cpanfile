@@ -29,18 +29,8 @@ requires 'version', '>= 0.77';
 requires 'Archive::Tar::Wrapper';
 requires 'Digest::SHA';
 
-# This is temporarily disabling official Term::GentooFunctions
-# They use Term::ANSIScreen which fails to install because of Module::Package
-# Instead, we're moving it to lib/ temporarily with copied relevant functions
-# from Term::ANSIScreen
-# RT #123497
-# -- Sawyer X
-# From Term::GentooFunctions
-requires 'Term::ANSIColor';
-requires 'Term::Size';
-# From Log::Dispatch::Screen::Gentoo
-#requires 'Log::Dispatch::Screen::Gentoo';
-requires 'Module::Runtime';
+requires 'Log::Dispatch::Screen::Gentoo';
+requires 'Term::GentooFunctions', '>= 1.3700';
 
 # Optimizes Gentoo color output
 requires 'Unicode::UTF8';
