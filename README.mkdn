@@ -8,7 +8,7 @@ version 1.1
 
 # DESCRIPTION
 
-Pakket is a meta-packaging system that allows you to manage your system
+Pakket is a meta-packaging system that allows you to manage
 dependencies. It works by trying to avoid work.
 
 ## What can you do with Pakket?
