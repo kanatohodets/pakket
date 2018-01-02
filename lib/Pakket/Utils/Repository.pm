@@ -1,4 +1,5 @@
 package Pakket::Utils::Repository;
+# ABSTRACT: Repository utility functions
 
 use strict;
 use warnings;
