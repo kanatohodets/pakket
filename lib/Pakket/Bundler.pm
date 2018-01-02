@@ -111,7 +111,7 @@ sub bundle {
 
 sub _rebase_build_to_output_dir {
     my ( $self, $build_dir, $orig_filename ) = @_;
-    ( my $new_filename = $orig_filename ) =~ s/^$build_dir//ms;
+    ( my $new_filename = $orig_filename ) =~ s/^ \Q$build_dir\E //xms;
     my @parts = File::Spec->splitdir($new_filename);
 
     # in case the path is absolute (leading slash)
