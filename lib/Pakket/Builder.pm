@@ -9,7 +9,6 @@ use File::Copy::Recursive     qw< dircopy     >;
 use Algorithm::Diff::Callback qw< diff_hashes >;
 use Types::Path::Tiny         qw< Path >;
 use Log::Any                  qw< $log >;
-use List::Util                qw< first >;
 use version 0.77;
 
 use Pakket::Log qw< log_success log_fail >;
@@ -278,8 +277,7 @@ sub run_build {
     my $bootstrap_prereqs = $params->{'bootstrapping_2_deps_only'}    || 0;
     my $full_name         = $prereq->full_name;
 
-    first { $prereq->name eq $_ }
-        @{ $self->builders->{ $prereq->category }->exclude_packages }
+    $self->builders->{ $prereq->category }->exclude_packages->{ $prereq->name }
         and return;
 
     if ( ! $bootstrap_prereqs and defined $self->is_built->{$full_name} ) {

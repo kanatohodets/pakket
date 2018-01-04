@@ -12,8 +12,14 @@ use Carp ();
 with qw<Pakket::Role::Builder>;
 
 has '+exclude_packages' => (
-    # 'perl_mlb' is a MetaCPAN bug
-    'default' => [ qw< perl perl_mlb > ],
+    'default' => sub {
+        return {
+            'perl'     => 1,
+
+            # MetaCPAN bug
+            'perl_mlb' => 1,
+        };
+    },
 );
 
 sub build_package {

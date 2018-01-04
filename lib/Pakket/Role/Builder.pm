@@ -10,8 +10,8 @@ requires qw< build_package >;
 
 has 'exclude_packages' => (
     'is'      => 'ro',
-    'isa'     => 'ArrayRef',
-    'default' => sub { [] },
+    'isa'     => 'HashRef',
+    'default' => sub { +{} },
 );
 
 no Moose::Role;
