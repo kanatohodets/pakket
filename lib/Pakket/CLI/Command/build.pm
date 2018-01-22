@@ -96,11 +96,10 @@ sub validate_args {
         my ( $cat, $name, $version, $release ) =
             $spec_str =~ PAKKET_PACKAGE_SPEC();
 
-        if ( ! ( $cat && $name && $version && $release ) ) {
-            $self->usage_error(
+        $cat && $name && $version && $release
+            or $self->usage_error(
                 "Provide category/name=version:release, not '$spec_str'",
             );
-        }
 
         my $query;
         eval { $query = Pakket::PackageQuery->new_from_string($spec_str); 1; }

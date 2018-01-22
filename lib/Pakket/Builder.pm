@@ -126,8 +126,8 @@ sub _build_bundler {
 }
 
 sub build {
-    my ( $self, @requirements ) = @_;
-    my %categories = map +( $_->category => 1 ), @requirements;
+    my ( $self, @queries ) = @_;
+    my %categories = map +( $_->category => 1 ), @queries;
 
     $self->_setup_build_dir;
 
@@ -138,8 +138,8 @@ sub build {
         }
     }
 
-    foreach my $requirement (@requirements ) {
-        $self->run_build($requirement);
+    foreach my $query (@queries) {
+        $self->run_build($query);
     }
 }
 
@@ -270,14 +270,14 @@ sub bootstrap_build {
 }
 
 sub run_build {
-    my ( $self, $prereq, $params ) = @_;
+    my ( $self, $query, $params ) = @_;
     $params //= {};
     my $level             = $params->{'level'}                        || 0;
     my $skip_prereqs      = $params->{'bootstrapping_1_skip_prereqs'} || 0;
     my $bootstrap_prereqs = $params->{'bootstrapping_2_deps_only'}    || 0;
-    my $full_name         = $prereq->full_name;
+    my $full_name         = $query->full_name;
 
-    $self->builders->{ $prereq->category }->exclude_packages->{ $prereq->name }
+    $self->builders->{ $query->category }->exclude_packages->{ $query->name }
         and return;
 
     if ( ! $bootstrap_prereqs and defined $self->is_built->{$full_name} ) {
@@ -290,11 +290,11 @@ sub run_build {
 
     $self->is_built->{$full_name} = 1;
 
-    $log->infof( '%s Working on %s', '|...' x $level, $prereq->full_name );
+    $log->infof( '%s Working on %s', '|...' x $level, $query->full_name );
 
     # Create a Package instance from the spec
     # using the information we have on it
-    my $package_spec = $self->spec_repo->retrieve_package_spec($prereq);
+    my $package_spec = $self->spec_repo->retrieve_package_spec($query);
     my $package      = Pakket::Package->new_from_spec( +{
         %{$package_spec},
 
@@ -315,7 +315,7 @@ sub run_build {
 
             # Phase 3 needs to avoid trying to install
             # the bare minimum toolchain (Phase 1)
-            $prereq->category => { $package->name => $package->version },
+            $query->category => { $package->name => $package->version },
         };
 
         my $successfully_installed = $installer->try_to_install_package(
@@ -332,7 +332,7 @@ sub run_build {
             # snapshot_build_dir
             $self->snapshot_build_dir( $package, $main_build_dir->absolute, 0 );
 
-            $log->infof( '%s Installed %s', '|...' x $level, $prereq->full_name );
+            $log->infof( '%s Installed %s', '|...' x $level, $query->full_name );
 
             # sync build cache with our install cache
             # so we do not accidentally build things
@@ -456,8 +456,8 @@ sub run_build {
         $package_files,
     );
 
-    $log->infof( '%s Finished on %s', '|...' x $level, $prereq->full_name );
-    log_success( sprintf 'Building %s', $prereq->full_name );
+    $log->infof( '%s Finished on %s', '|...' x $level, $query->full_name );
+    log_success( sprintf 'Building %s', $query->full_name );
 
     return;
 }
