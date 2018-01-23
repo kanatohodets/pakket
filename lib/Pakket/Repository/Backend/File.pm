@@ -174,3 +174,179 @@ no Moose;
 __END__
 
 =pod
+
+=head1 SYNOPSIS
+
+    my $backend = Pakket::Repository::Backend::File->new(
+        'directory'      => '/var/lib/pakket/specs',
+        'file_extension' => 'json',
+        'index_file'     => 'index.json',
+        'pretty_json'    => 1,
+    );
+
+    # Handling locations
+    $backend->store_location( $id, $path_to_file );
+    my $path_to_file = $backend->retrieve_location($id);
+    $backend->remove_location($id);
+
+    # Handling content
+    $backend->store_content( $id, $structure );
+    my $structure = $backend->retrieve_content($id);
+    $backend->remove_content($id);
+
+    # Getting data
+    my $ids = $backend->all_object_ids; # [ ... ]
+    my $ids = $backend->all_object_ids_by_name( 'Path::Tiny', 'perl' );
+    if ( $backend->has_object($id) ) {
+        ...
+    }
+
+=head1 DESCRIPTION
+
+This is a file-based repository backend, allowing a repository to store
+information as files. It could store either content or files
+("locations").
+
+Every and content is stored using its ID. The backend maintains an
+index file of all files so it could locate them quickly. The index file
+is stored in a JSON format.
+
+You can control the file extension and the index filename. See below.
+
+=head1 ATTRIBUTES
+
+When creating a new class, you can provide the following attributes:
+
+=head2 directory
+
+This is the directory that will be used. There is no root so it is
+better to provide an absolute path.
+
+This is a required parameter.
+
+=head2 file_extension
+
+The extension of files it stores. This has no effect on the format of
+the files, only the file extension. The reason is to be able to differ
+between files that contain specs versus files of parcels.
+
+Our preference is C<pkt> for packages, C<spkt> for sources, and C<json>
+for specs.
+
+Default: B<< C<sgm> >>.
+
+=head2 index_file
+
+The index file contains a list of all packages IDs and the files that
+correlate to it. Files are stored by their hashed ID and the index
+contains a mapping from the non-hashed ID to the hashed ID.
+
+Default: B<< F<index.json> >>.
+
+=head2 pretty_json
+
+This is a boolean controlling whether the index file should store
+pleasantly-readable JSON.
+
+Default: B<1>.
+
+=head1 METHODS
+
+All examples below use a particular string as the ID, but the ID could
+be anything you wish. Pakket uses the package ID for it, which consists
+of the category, name, version, and release.
+
+=head2 store_location
+
+    $backend->store_location(
+        'perl/Path::Tiny=0.100:1',
+        '/tmp/myfile.tar.gz',
+    );
+
+This method stores the ID with the hashed value and moves the file
+under its new name to the directory.
+
+It will return the file path.
+
+=head2 retrieve_location 
+
+    my $path = $backend->retrieve_location('perl/Path::Tiny=0.100:1');
+
+This method locates the file in the directory and provides the full
+path to it. It does not copy it elsewhere. If you want to change it,
+you will need to do this yourself.
+
+=head2 remove_location
+
+    $backend->remove_location('perl/Path::Tiny=0.100:1');
+
+This will remove the file from the directory and the index.
+
+=head2 store_content
+
+    my $path = $backend->store_content(
+        'perl/Path::Tiny=0.100:1',
+        {
+            'Package' => {
+                'category' => 'perl',
+                'name'     => 'Path::Tiny',
+                'version'  => 0.100,
+                'release'  => 1,
+            },
+
+            'Prereqs' => {...},
+        },
+    );
+
+This method stores content (normally spec files, but could be used for
+anything) in the directory. It will create a file with the appropriate
+hash ID and save it in the index by serializing it in JSON. This means
+you cannot store objects, only plain structures.
+
+It will return the path of that file. However, this is likely not be
+very helpful since you would like to retrieve the content. For this,
+use C<retrieve_content> described below.
+
+=head2 retrieve_content
+
+    my $struct = $backend->retrieve_content('perl/Path::Tiny=0.100:1');
+
+This method will find the file, unserialize the file content, and
+return the structure it stores.
+
+=head2 remove_content
+
+    $backend->remove_content('perl/Path::Tiny=0.100:1');
+
+=head2 repo_index
+
+    my $repo_index_content = $backend->repo_index();
+
+This retrieves the unserialized content of the index. It is a hash
+reference that maps IDs to hashed IDs that correlate to file paths.
+
+=head2 all_object_ids
+
+    my $ids = $backend->all_object_ids();
+
+Returns all the IDs of objects it stores in an array reference. This
+helps find whether an object is available or not.
+
+=head2 all_object_ids_by_name
+
+    my $ids = $backend->all_object_ids_by_name( $name, $category );
+
+This is a more specialized method that receives a name and category for
+a package and locates all matching IDs in the index. It then returns
+them in an array reference.
+
+You do not normally need to use this method.
+
+=head2 has_object
+
+    my $exists = $backend->has_object('perl/Path::Tiny=0.100:1');
+
+This method receives an ID and returns a boolean if it's available.
+
+This method depends on the index so if you screw up with the index, all
+bets are off. The methods above make sure the index is consistent.
