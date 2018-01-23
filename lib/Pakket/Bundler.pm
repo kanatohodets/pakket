@@ -44,9 +44,7 @@ sub BUILD {
 sub bundle {
     my ( $self, $build_dir, $package, $files ) = @_;
 
-    my $original_dir = Path::Tiny->cwd;
-
-    # totally arbitrary, maybe add to constants?
+    my $original_dir    = Path::Tiny->cwd;
     my $parcel_dir_path = Path::Tiny->tempdir(
         'TEMPLATE' => BUNDLE_DIR_TEMPLATE(),
         'CLEANUP'  => 1,
