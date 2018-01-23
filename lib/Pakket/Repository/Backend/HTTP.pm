@@ -56,6 +56,8 @@ sub BUILD {
 
     # TODO: should we create dedicated endpoint to check existence of repo
     # because all_object_ids may be too heavy?
+    # FIXME: If we set this to "head" instead of "get", we at least
+    # don't transfer the content. -- SX
     my $url = $self->base_url . '/all_object_ids';
     my $response = $self->http_client->get($url);
     if ( !$response->{'success'} ) {
@@ -91,7 +93,7 @@ sub all_object_ids_by_name {
     my $response = $self->http_client->get(
         sprintf( '%s/all_object_ids_by_name?name=%s&category=%s',
             $self->base_url, uri_escape($name), uri_escape($category),
-        )
+        ),
     );
 
     if ( !$response->{'success'} ) {
