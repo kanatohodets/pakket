@@ -5,6 +5,7 @@ requires 'IO::Prompt::Tiny';
 requires 'CPAN::DistnameInfo';
 requires 'CPAN::Meta::Requirements', '>= 2.140';
 requires 'File::Basename';
+requires 'File::chdir';
 requires 'File::Copy::Recursive';
 requires 'File::Find';
 requires 'File::HomeDir';
