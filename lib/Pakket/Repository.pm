@@ -6,7 +6,8 @@ use MooseX::StrictConstructor;
 
 use Path::Tiny;
 use Archive::Any;
-use Archive::Tar::Wrapper;
+use Archive::Tar;
+use File::chdir;
 use Carp ();
 use Log::Any      qw< $log >;
 use Pakket::Types qw< PakketRepositoryBackend >;
@@ -121,10 +122,12 @@ sub latest_version_release {
 sub freeze_location {
     my ( $self, $orig_path ) = @_;
 
-    my $arch = Archive::Tar::Wrapper->new();
+    my $base_path = $orig_path;
+    my @files;
 
     if ( $orig_path->is_file ) {
-        $arch->add( $orig_path->basename, $orig_path->stringify, );
+        $base_path = $orig_path->basename;
+        push @files, $orig_path;
     } elsif ( $orig_path->is_dir ) {
         $orig_path->children
             or Carp::croak(
@@ -135,8 +138,7 @@ sub freeze_location {
                 my $path = shift;
                 $path->is_file or return;
 
-                $arch->add( $path->relative($orig_path)->stringify,
-                    $path->stringify, );
+                push @files, $path;
             },
             { 'recurse' => 1 },
         );
@@ -145,11 +147,17 @@ sub freeze_location {
             $log->criticalf( "Unknown location type: %s", $orig_path ) );
     }
 
-    my $file = Path::Tiny->tempfile();
+    @files = map {$_->relative($base_path)->stringify} @files;
 
     # Write and compress
+    my $arch = Archive::Tar->new();
+    {
+        local $CWD = $base_path; # chdir, to use relative paths in archive
+        $arch->add_files(@files);
+    }
+    my $file = Path::Tiny->tempfile();
     $log->debug("Writing archive as $file");
-    $arch->write( $file->stringify, 1 );
+    $arch->write( $file->stringify, COMPRESS_GZIP );
 
     return $file;
 }
