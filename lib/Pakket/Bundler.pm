@@ -4,6 +4,7 @@ package Pakket::Bundler;
 use Moose;
 use MooseX::StrictConstructor;
 use JSON::MaybeXS;
+use File::chdir;
 use File::Spec;
 use Carp              qw< croak >;
 use Path::Tiny        qw< path >;
@@ -81,11 +82,10 @@ sub bundle {
             my $new_symlink = $self->_rebase_build_to_output_dir(
                 $build_dir, $files->{$orig_file},
             );
-
-            my $previous_dir = Path::Tiny->cwd;
-            chdir $new_fullname->parent;
-            symlink $new_symlink, $new_fullname->basename;
-            chdir $previous_dir;
+            {
+                local $CWD = $new_fullname->parent;
+                symlink $new_symlink, $new_fullname->basename;
+            }
         }
     }
 
