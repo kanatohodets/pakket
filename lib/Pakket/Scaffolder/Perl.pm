@@ -371,7 +371,8 @@ sub add_spec_for_package {
 
         my $spec_req_h = $spec_req->as_string_hash();
         for my $package_name ( keys %{ $spec_req_h } ) {
-            push @dependencies_to_scaffold, [$package_name, $spec_req_h];
+            push @dependencies_to_scaffold,
+                { 'package_name' => $package_name, 'requirements' => $spec_req_h };
             $spec->{'Prereqs'}{'perl'}{$phase}->{ $package_name } =
                 +{ 'version' => ( $spec_req_h->{ $package_name } || 0 ) };
         }
@@ -379,8 +380,8 @@ sub add_spec_for_package {
 
     if ( ! $self->no_deps ) {
         $log->debugf( 'Scaffolding dependencies of %s', $package->full_name );
-        for my $dependency (@dependencies_to_scaffold) {
-            $self->scaffold_package( @{$dependency} );
+        for my $dep (@dependencies_to_scaffold) {
+            $self->scaffold_package($dep->{'package_name'}, $dep->{'requirements'} );
         }
     }
 
