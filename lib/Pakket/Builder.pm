@@ -384,10 +384,11 @@ sub run_build {
 
     $log->debug('Copying package files');
 
+    my $env_vars_spec = $package->build_opts->{'env_vars'};
     # FIXME: This shouldn't just be configure flags
     # we should allow the builder to have access to a general
     # metadata chunk which *might* include configure flags
-    my %env_vars = generate_env_vars( $top_build_dir, $main_build_dir );
+    my %env_vars = generate_env_vars( $top_build_dir, $main_build_dir, $env_vars_spec );
     my $configure_flags = $self->get_configure_flags(
         $package->build_opts->{'configure_flags'},
         { %ENV, %env_vars },
@@ -428,6 +429,7 @@ sub run_build {
             $main_build_dir,
             $configure_flags,
             $build_flags,
+            $env_vars_spec,
         );
 
         if ( $package->build_opts->{'post_build'} ) {

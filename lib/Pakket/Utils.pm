@@ -28,12 +28,13 @@ sub is_writeable {
 }
 
 sub generate_env_vars {
-    my ( $build_dir, $prefix, $opts ) = @_;
+    my ( $build_dir, $prefix, $opts, $manual_env_vars ) = @_;
     my $lib_path       = generate_lib_path($prefix);
     my $bin_path       = generate_bin_path($prefix);
     my $pkgconfig_path = generate_pkgconfig_path($prefix);
 
     my $inc = $opts->{'inc'} || '';
+    $manual_env_vars //= {};
 
     my @perl5lib = (
         $prefix->child(qw<lib perl5>)->absolute->stringify,
@@ -59,6 +60,7 @@ sub generate_env_vars {
         'LIBRARY_PATH'    => $lib_path,
         'PATH'            => $bin_path,
         %perl_opts,
+        %{$manual_env_vars},
     );
 }
 

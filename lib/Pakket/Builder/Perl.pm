@@ -23,7 +23,7 @@ has '+exclude_packages' => (
 );
 
 sub build_package {
-    my ( $self, $package, $build_dir, $prefix, $config_flags, $build_flags ) = @_;
+    my ( $self, $package, $build_dir, $prefix, $config_flags, $build_flags, $env_vars ) = @_;
 
     $log->info("Building Perl module: $package");
 
@@ -35,7 +35,7 @@ sub build_package {
         chomp( $inc = `perl -e'print join ":",\@INC'` );
     }
 
-    my %env = generate_env_vars( $build_dir, $prefix, { 'inc' => $inc } );
+    my %env = generate_env_vars( $build_dir, $prefix, { 'inc' => $inc }, $env_vars);
 
     # By default ExtUtils::Install checks if a file wasn't changed then skip it
     # which breaks Builder::snapshot_build_dir().

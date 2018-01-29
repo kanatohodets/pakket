@@ -134,6 +134,13 @@ SHOW
                 print "        $flag\n";
             }
         }
+        if ($spec->{'build_opts'}{'env_vars'}) {
+            print "    env vars:\n";
+            for my $var (keys %{$spec->{'build_opts'}{'env_vars'}}) {
+                my $value = $spec->{'build_opts'}{'env_vars'}{$var};
+                print "        $var=$value\n";
+            }
+        }
         print "\n";
     }
 
