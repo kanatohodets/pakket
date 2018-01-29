@@ -372,7 +372,7 @@ sub add_spec_for_package {
 
         my $spec_req_h = $spec_req->as_string_hash();
         for my $package_name ( keys %{ $spec_req_h } ) {
-            push @dependencies_to_scaffold, [$package_name, $spec_req];
+            push @dependencies_to_scaffold, [$package_name, $spec_req_h];
             $spec->{'Prereqs'}{'perl'}{$phase}->{ $package_name } =
                 +{ 'version' => ( $spec_req_h->{ $package_name } || 0 ) };
         }
