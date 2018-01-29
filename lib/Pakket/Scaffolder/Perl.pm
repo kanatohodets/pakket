@@ -197,11 +197,10 @@ sub run {
 
     # Bootstrap toolchain
     if ( !$self->no_bootstrap and !$self->no_deps ) {
-        my $requirements = $self->modules->{'configure'}{'requires'};
         for my $package ( @{ $self->perl_bootstrap_modules } ) {
             $log->debugf( 'Bootstrapping toolchain: %s', $package );
             eval {
-                $self->scaffold_package( $package, $requirements );
+                $self->scaffold_package( $package, { $package => "0" } );
                 1;
             } or do {
                 my $err = $@ || 'zombie error';
