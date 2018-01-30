@@ -132,10 +132,6 @@ See L<Pakket::Role::HasConfig>.
 
 See L<Pakket::Role::HasParcelRepo>.
 
-=head2 parcel_repo_backend
-
-See L<Pakket::Role::HasParcelRepo>.
-
 =head1 METHODS
 
 =head2 BUILD
