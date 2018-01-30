@@ -5,8 +5,15 @@ use Test::More 'tests' => 6;
 use Pakket::Package;
 use Pakket::Repository::Spec;
 use lib '.'; use t::lib::Utils;
+use Path::Tiny;
 
-my $config = t::lib::Utils::config();
+# Create directories and set them to be cleaned up when done
+# This is used in the config() which requires a string to create
+# the repositories
+our @DIRS = map Path::Tiny->tempdir, 1 .. 3;
+END { unlink for @DIRS }
+
+my $config = t::lib::Utils::config(@DIRS);
 my $repo;
 
 subtest 'Setup' => sub {

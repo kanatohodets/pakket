@@ -8,8 +8,14 @@ use Pakket::Package;
 use Path::Tiny qw< path >;
 use Archive::Any;
 
+# Create directories and set them to be cleaned up when done
+# This is used in the config() which requires a string to create
+# the repositories
+our @DIRS = map Path::Tiny->tempdir, 1 .. 3;
+END { unlink for @DIRS }
+
 sub create_builder {
-    return Pakket::Builder->new( 'config' => t::lib::Utils::config() );
+    return Pakket::Builder->new( 'config' => t::lib::Utils::config(@DIRS) );
 }
 
 can_ok(
