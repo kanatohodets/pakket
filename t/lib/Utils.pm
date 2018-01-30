@@ -4,6 +4,13 @@ use strict;
 use warnings;
 use Module::Faker;
 use Path::Tiny qw< path >;
+use Pakket::Log;
+use Log::Any::Adapter;
+
+Log::Any::Adapter->set(
+    'Dispatch',
+    'dispatcher' => Pakket::Log->arg_default_logger(),
+);
 
 sub generate_modules {
     my $fake_dist_dir = Path::Tiny->tempdir();
