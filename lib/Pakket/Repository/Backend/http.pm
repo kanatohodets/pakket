@@ -51,9 +51,9 @@ has 'base_path' => (
 );
 
 has 'http_client' => (
-    'is'       => 'ro',
-    'isa'      => 'HTTP::Tiny',
-    'default'  => sub { HTTP::Tiny->new },
+    'is'      => 'ro',
+    'isa'     => 'HTTP::Tiny',
+    'default' => sub { HTTP::Tiny->new },
 );
 
 sub BUILD {
