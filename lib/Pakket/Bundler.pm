@@ -30,18 +30,6 @@ with qw<
     Pakket::Role::HasParcelRepo
 >;
 
-# TODO
-# The reason behind this is to make sure we already inflate
-# the Parcel Repo before using it, because we might chdir
-# when we want to use it, and if the directory paths are
-# relative, it might not match anymore. This is why it was
-# AbsPath prior. We can try it and if it works remove this
-# chunk. -- SX.
-sub BUILD {
-    my $self = shift;
-    $self->parcel_repo;
-}
-
 sub bundle {
     my ( $self, $build_dir, $package, $files ) = @_;
 
