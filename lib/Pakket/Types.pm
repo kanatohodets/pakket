@@ -7,6 +7,7 @@ use warnings;
 use Moose::Util::TypeConstraints;
 use Carp     qw< croak >;
 use Log::Any qw< $log >;
+use Ref::Util qw< is_ref is_arrayref is_hashref >;
 use Safe::Isa;
 use Module::Runtime qw< require_module >;
 use Pakket::Constants qw<
@@ -16,23 +17,45 @@ use Pakket::Constants qw<
 
 # PakketRepositoryBackend
 
-sub _coerce_backend_from_arrayref {
-    my $backend_data = shift;
-    my ( $subclass, @args ) = @{$backend_data};
-    my $class = "Pakket::Repository::Backend::$subclass";
+sub _coerce_backend_from_str {
+    my $uri = shift;
+
+    my ($scheme) = $uri =~ m{^ ( [a-zA-Z0-9_]+ ) :// }xms;
+    my $class    = "Pakket::Repository::Backend::$scheme";
 
     eval { require_module($class); 1; } or do {
         croak( $log->critical("Failed to load backend '$class': $@") );
     };
 
-    return $class->new(@args);
+    return $class->new_from_uri($uri);
+}
+
+sub _coerce_backend_from_arrayref {
+    my $arrayref = shift;
+    my ( $name, $data ) = @{$arrayref};
+    $data //= {};
+    is_hashref($data)
+        or croak( $log->critical('Second arg to backend is not hashref'); );
+
+    my $class = "Pakket::Repository::Backend::$name";
+
+    eval { require_module($class); 1; } or do {
+        croak( $log->critical("Failed to load backend '$class': $@") );
+    };
+
+    return $class->new($data);
 }
 
 subtype 'PakketRepositoryBackend', as 'Object', where {
-    $_->$_isa('ARRAY') || $_->$_does('Pakket::Role::Repository::Backend')
+    $_->$_does('Pakket::Role::Repository::Backend')
+        || is_arrayref($_)
+        || ( !is_ref($_) && length )
 }, message {
-    'Must be a Pakket::Repository::Backend object or an arrayref'
+    'Must be a Pakket::Repository::Backend object or a URI string or arrayref'
 };
+
+coerce 'PakketRepositoryBackend', from 'Str',
+    via { return _coerce_backend_from_str($_); };
 
 coerce 'PakketRepositoryBackend', from 'ArrayRef',
     via { return _coerce_backend_from_arrayref($_); };
