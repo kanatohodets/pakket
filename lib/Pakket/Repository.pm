@@ -31,7 +31,7 @@ sub _build_backend {
     my $self = shift;
     Carp::croak( $log->critical(
         'You did not specify a backend '
-      . '(using parameter or builder)',
+      . '(using parameter or URI string)',
     ) );
 }
 
