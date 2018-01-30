@@ -170,3 +170,136 @@ no Moose;
 __END__
 
 =pod
+
+=head1 SYNOPSIS
+
+    my $repository = Pakket::Repository::Spec->new(
+        'backend' => Pakket::Repository::Backend::file->new(...),
+    );
+
+    # or
+    my $repository = Pakket::Repository::Spec->new(
+        'backend' => 'file:///var/lib/',
+    );
+
+    ...
+
+This is an abstract class that represents all repositories. It
+implements a few generic methods all repositories use. Other than that,
+there is very little usage of instantiate this object.
+
+Below is the documentation for these generic methods, as well as how to
+set the backend when instantiating. If you are interested in
+documentation about particular repository methods, see:
+
+=over 4
+
+=item * L<Pakket::Repository::Spec>
+
+=item * L<Pakket::Repository::Source>
+
+=item * L<Pakket::Repository::Parcel>
+
+=back
+
+=head1 ATTRIBUTES
+
+=head2 backend
+
+    my $repo = Pakket::Repository::Source->new(
+        'backend' => Pakket::Repository::Backend::file->new(
+            ...
+        ),
+    );
+
+    # Or the short form:
+    my $repo = Pakket::Repository::Source->new(
+        'backed' => 'file://...',
+    );
+
+    # Or, if you need additional parameters
+    my $repo = Pakket::Repository::Source->new(
+        'backed'       => 'file://...',
+        'backend_opts' => {
+            'file_extension' => 'src',
+        },
+    );
+
+You can either provide an object or a string URI. You can provide
+
+Holds the repository backend implementation. Can be set with either an
+object instance or with a string URI. Additional parameters can be set
+with C<backend_opts>.
+
+Existing backends are:
+
+=over 4
+
+=item * L<Pakket::Repository::Backend::file>
+
+File-based backend, useful locally.
+
+=item * L<Pakket::Repository::Backend::http>
+
+HTTP-based backend, useful remotely.
+
+=item * L<Pakket::Repository::Backend::dbi>
+
+Database-based backed, useful remotely.
+
+=back
+
+=head2 backend_opts
+
+A hash reference that holds any additional parameters that could either
+be part of the URI specification (like a port) or extended beyond the
+URI specification (like a file extension).
+
+See examples in C<backend> above.
+
+=head1 METHODS
+
+=head2 retrieve_package_file
+
+=head2 remove_package_file
+
+=head2 latest_version_release
+
+=head2 freeze_location
+
+=head2 all_object_ids
+
+This method will call C<all_object_ids> on the backend.
+
+=head2 all_object_ids_by_name
+
+This method will call C<all_object_ids_by_name> on the backend.
+
+=head2 has_object
+
+This method will call C<has_object> on the backend.
+
+=head2 store_content
+
+This method will call C<store_content> on the backend.
+
+=head2 retrieve_content
+
+This method will call C<retrieve_content> on the backend.
+
+=head2 remove_content
+
+This method will call C<remove_content> on the backend.
+
+=head2 store_location
+
+This method will call C<store_location> on the backend.
+
+=head2 retrieve_location
+
+This method will call C<retrieve_location> on the backend.
+
+=head2 remove_location
+
+This method will call C<remove_location> on the backend.
+
