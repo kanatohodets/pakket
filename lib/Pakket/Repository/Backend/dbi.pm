@@ -23,6 +23,11 @@ has 'dbh' => (
    'coerce'   => 1,
 );
 
+sub new_from_uri {
+    my ( $class, $uri ) = @_;
+    return $class->new( 'dbh' => $uri );
+}
+
 ## no critic qw(Variables::ProhibitPackageVars)
 sub all_object_ids {
     my $self = shift;

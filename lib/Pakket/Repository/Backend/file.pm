@@ -10,6 +10,7 @@ use Path::Tiny        qw< path >;
 use Log::Any          qw< $log >;
 use Types::Path::Tiny qw< Path AbsPath >;
 use Digest::SHA       qw< sha1_hex >;
+use Regexp::Common    qw< URI >;
 use Pakket::Utils     qw< encode_json_canonical encode_json_pretty >;
 use Pakket::Constants qw< PAKKET_PACKAGE_SPEC >;
 
@@ -45,6 +46,16 @@ has 'pretty_json' => (
     'isa'     => 'Bool',
     'default' => sub {1},
 );
+
+sub new_from_uri {
+    my ( $class, $uri ) = @_;
+
+    $uri =~ /$RE{'URI'}{'file'}{'-keep'}/xms
+        or croak( $log->critical("URI '$uri' is not a proper file URI") );
+
+    my $path = $3; # perldoc Regexp::Common::URI::file
+    return $class->new( 'directory' => $path );
+}
 
 sub BUILD {
     my $self = shift;

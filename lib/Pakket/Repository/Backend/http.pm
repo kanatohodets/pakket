@@ -11,6 +11,7 @@ use Path::Tiny        qw< path >;
 use Log::Any          qw< $log >;
 use Types::Path::Tiny qw< Path >;
 use HTTP::Tiny;
+use Regexp::Common    qw< URI >;
 use Pakket::Utils     qw< encode_json_canonical >;
 
 use constant { 'HTTP_DEFAULT_PORT' => 80 };
@@ -55,6 +56,27 @@ has 'http_client' => (
     'isa'     => 'HTTP::Tiny',
     'default' => sub { HTTP::Tiny->new },
 );
+
+sub new_from_uri {
+    my ( $class, $uri ) = @_;
+
+    # We allow the user to not include http, because we're nice like that
+    $uri !~ m{^https?://}xms
+        and $uri = "http://$uri";
+
+    $uri =~ /$RE{'URI'}{'HTTP'}{ '-scheme' => qr{https?} }{'-keep'}/xms
+        or croak( $log->critical("URI '$uri' is not a proper HTTP URI") );
+
+    # perldoc Regexp::Common::URI::http
+    return $class->new(
+        'scheme'    => $2,
+        'host'      => $3,
+
+        # only if matched
+      ( 'port'      => $4 )x !!$4,
+      ( 'base_path' => $5 )x !!$5,
+    );
+}
 
 sub BUILD {
     my $self = shift;

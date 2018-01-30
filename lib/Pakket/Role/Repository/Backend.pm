@@ -6,6 +6,8 @@ use Moose::Role;
 # These are helper methods we want the backend to implement
 # in order for the Repository to easily use across any backend
 requires qw<
+    new_from_uri
+
     all_object_ids all_object_ids_by_name has_object
 
     store_content  retrieve_content  remove_content
