@@ -35,7 +35,7 @@ sub _coerce_backend_from_arrayref {
     my ( $name, $data ) = @{$arrayref};
     $data //= {};
     is_hashref($data)
-        or croak( $log->critical('Second arg to backend is not hashref'); );
+        or croak( $log->critical('Second arg to backend is not hashref') );
 
     my $class = "Pakket::Repository::Backend::$name";
 
