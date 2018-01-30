@@ -19,6 +19,12 @@ with qw<
     Pakket::Role::Repository::Backend
 >;
 
+has 'scheme' => (
+    'is'      => 'ro',
+    'isa'     => 'Str',
+    'default' => sub {'http'},
+);
+
 has 'host' => (
     'is'       => 'ro',
     'isa'      => 'Str',
@@ -69,8 +75,10 @@ sub BUILD {
 
 sub _build_base_url {
     my $self = shift;
+
     return sprintf(
-        'http://%s:%s%s', $self->host, $self->port, $self->base_path,
+        '%s://%s:%s%s',
+        $self->scheme, $self->host, $self->port, $self->base_path,
     );
 }
 
@@ -221,6 +229,7 @@ __END__
 =head1 SYNOPSIS
 
     my $backend = Pakket::Repository::Backend::http->new(
+        'scheme'      => 'https',
         'host'        => 'your.pakket.subdomain.company.com',
         'port'        => '80',
         'base_path'   => '/pakket/,
@@ -256,6 +265,12 @@ On the server side you will need to use L<Pakket::Web>.
 =head1 ATTRIBUTES
 
 When creating a new class, you can provide the following attributes:
+
+=head2 scheme
+
+The scheme to use.
+
+Default: B<https>.
 
 =head2 host
 
