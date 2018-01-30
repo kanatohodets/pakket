@@ -5,6 +5,7 @@ use warnings;
 use Module::Faker;
 use Path::Tiny qw< path >;
 use Pakket::Log;
+use Pakket::Repository::Backend::file;
 use Log::Any::Adapter;
 
 Log::Any::Adapter->set(
@@ -26,13 +27,16 @@ sub generate_modules {
 }
 
 sub config {
+    my @dirs = @_;
+
     return +{
         'repositories' => {
-            'spec'   => [ 'File' => ( 'directory' => Path::Tiny->tempdir() ) ],
-            'source' => [ 'File' => ( 'directory' => Path::Tiny->tempdir() ) ],
-            'parcel' => [ 'File' => ( 'directory' => Path::Tiny->tempdir() ) ],
+            'spec'   => "file://$dirs[0]",
+            'source' => "file://$dirs[1]",
+            'parcel' => "file://$dirs[2]",
         },
     };
 }
+
 
 1;
