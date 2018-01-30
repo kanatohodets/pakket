@@ -1,4 +1,4 @@
-package Pakket::Repository::Backend::HTTP;
+package Pakket::Repository::Backend::http;
 # ABSTRACT: A remote HTTP backend repository
 
 use Moose;
@@ -48,7 +48,6 @@ has 'http_client' => (
     'default'  => sub { HTTP::Tiny->new },
 );
 
-
 sub BUILD {
     my $self = shift;
 
@@ -58,7 +57,7 @@ sub BUILD {
     # because all_object_ids may be too heavy?
     # FIXME: If we set this to "head" instead of "get", we at least
     # don't transfer the content. -- SX
-    my $url = $self->base_url . '/all_object_ids';
+    my $url      = $self->base_url . '/all_object_ids';
     my $response = $self->http_client->get($url);
     if ( !$response->{'success'} ) {
         croak( $log->criticalf( 'Could not connect to repository %s : %d -- %s',
@@ -126,7 +125,7 @@ sub store_location {
         { 'binmode' => ':raw' },
     );
 
-    my $url = "/store/location?id=" . uri_escape($id);
+    my $url      = "/store/location?id=" . uri_escape($id);
     my $full_url = $self->base_url . $url;
 
     my $response = $self->http_client->post(
@@ -219,7 +218,7 @@ __END__
 
 =head1 SYNOPSIS
 
-    my $backend = Pakket::Repository::Backend::HTTP->new(
+    my $backend = Pakket::Repository::Backend::http->new(
         'host'        => 'your.pakket.subdomain.company.com',
         'port'        => '80',
         'base_path'   => '/pakket/,
@@ -282,7 +281,7 @@ This is an advanced attribute that is generated automatically from the
 C<host>, C<port>, and C<base_path>. This uses B<http> by default but
 you can create your own with B<https>:
 
-    my $backend = Pakket::Repository::Backend::HTTP->new(
+    my $backend = Pakket::Repository::Backend::http->new(
         'base_path' => 'https://my.path:80/secure_packages/',
     );
 

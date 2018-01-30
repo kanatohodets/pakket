@@ -1,4 +1,4 @@
-package Pakket::Repository::Backend::File;
+package Pakket::Repository::Backend::file;
 # ABSTRACT: A file-based backend repository
 
 use Moose;
@@ -177,7 +177,7 @@ __END__
 
 =head1 SYNOPSIS
 
-    my $backend = Pakket::Repository::Backend::File->new(
+    my $backend = Pakket::Repository::Backend::file->new(
         'directory'      => '/var/lib/pakket/specs',
         'file_extension' => 'json',
         'index_file'     => 'index.json',
