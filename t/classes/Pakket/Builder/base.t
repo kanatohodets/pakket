@@ -27,7 +27,7 @@ subtest 'Defaults' => sub {
 
     isa_ok(
         $builder->source_repo->backend,
-        'Pakket::Repository::Backend::File',
+        'Pakket::Repository::Backend::file',
     );
 };
 

@@ -1,4 +1,4 @@
-package Pakket::Repository::Backend::DBI;
+package Pakket::Repository::Backend::dbi;
 # ABSTRACT: A DBI-based backend repository
 
 # FIXME: Add methods: remove_location, remove_content
