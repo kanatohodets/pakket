@@ -13,6 +13,8 @@ use Types::Path::Tiny qw< Path >;
 use HTTP::Tiny;
 use Pakket::Utils     qw< encode_json_canonical >;
 
+use constant { 'HTTP_DEFAULT_PORT' => 80 };
+
 with qw<
     Pakket::Role::Repository::Backend
 >;
@@ -24,9 +26,9 @@ has 'host' => (
 );
 
 has 'port' => (
-    'is'       => 'ro',
-    'isa'      => 'Str',
-    'required' => 1,
+    'is'      => 'ro',
+    'isa'     => 'Str',
+    'default' => sub { HTTP_DEFAULT_PORT() },
 );
 
 has 'base_url' => (
@@ -265,7 +267,7 @@ This is a required parameter.
 
 The port on which the remote server is listening.
 
-This is a required parameter.
+Default: B<80>.
 
 =head2 base_path
 
