@@ -50,6 +50,15 @@ has 'ignore_failures' => (
     'default' => sub {0},
 );
 
+has 'installed_packages' => (
+    'is'      => 'rw',
+    'isa'     => 'HashRef',
+    # Don't load installed_packages in constuctor.
+    # Installer is also used by Builder,
+    # which doesn't have installed_packages
+    'default' => sub { +{} },
+);
+
 sub install {
     my ( $self, @packages ) = @_;
 
@@ -61,6 +70,8 @@ sub install {
     @packages = $self->set_latest_version_for_undefined(@packages);
 
     foreach (@packages) { $self->requirements->{$_->short_name} = $_ };
+
+    $self->installed_packages($self->load_installed_packages($self->active_dir));
 
     if ( !$self->force ) {
         @packages = $self->drop_installed_packages(@packages);
@@ -129,7 +140,7 @@ sub install_package {
 
     $log->debugf( "About to install %s (into $dir)", $package->full_name );
 
-    is_installed($installer_cache, $package)
+    $self->is_installed($installer_cache, $package)
         and return;
 
     mark_as_installed($installer_cache, $package);
@@ -223,7 +234,12 @@ sub copy_package_to_install_dir {
 }
 
 sub is_installed {
-    my ($installer_cache, $package) = @_;
+    my ($self, $installer_cache, $package) = @_;
+
+    if ($self->installed_packages->{$package->full_name}) {
+        $log->infof( '%s already installed', $package->full_name );
+        return 1;
+    }
 
     my $pkg_cat  = $package->category;
     my $pkg_name = $package->name;
@@ -301,10 +317,9 @@ sub show_installed {
 sub drop_installed_packages {
     my $self = shift;
     my @packages = @_;
-    my $installed_packages = $self->load_installed_packages($self->active_dir);
     my @out;
     for my $package (@packages) {
-        if ($installed_packages->{$package->full_name}) {
+        if ($self->installed_packages->{$package->full_name}) {
             $log->infof( '%s already installed', $package->full_name );
         } else {
             push @out, $package;
