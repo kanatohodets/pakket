@@ -34,6 +34,14 @@ sub _coerce_backend_from_arrayref {
     my $arrayref = shift;
     my ( $name, $data ) = @{$arrayref};
     $data //= {};
+
+    # TODO: Remove that later.
+    # For back compatibility with old config.
+    if (!is_hashref($data)) {
+        my ( $n, @params ) = @{$arrayref};
+        $data = { @params };
+    }
+
     is_hashref($data)
         or croak( $log->critical('Second arg to backend is not hashref') );
 
