@@ -24,6 +24,7 @@ requires 'namespace::autoclean';
 requires 'Path::Tiny';
 requires 'Parse::CPAN::Packages::Fast';
 requires 'Ref::Util';
+requires 'Regexp::Common';
 requires 'System::Command';
 requires 'Types::Path::Tiny';
 requires 'version', '>= 0.77';
