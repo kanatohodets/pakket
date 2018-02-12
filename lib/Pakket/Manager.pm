@@ -141,6 +141,18 @@ SHOW
                 print "        $var=$value\n";
             }
         }
+        if ($spec->{'build_opts'}{'pre_build'}) {
+            print "    pre build commands:\n";
+            for my $cmd (@{$spec->{'build_opts'}{'pre_build'}}) {
+                print "        " . join(" ", @{$cmd}) . "\n";
+            }
+        }
+        if ($spec->{'build_opts'}{'post_build'}) {
+            print "    post build commands:\n";
+            for my $cmd (@{$spec->{'build_opts'}{'post_build'}}) {
+                print "        " . join(" ", @{$cmd}) . "\n";
+            }
+        }
         print "\n";
     }
 
