@@ -41,6 +41,16 @@ has 'index_file' => (
     },
 );
 
+has 'lock_file' => (
+    'is'       => 'ro',
+    'isa'      => Path,
+    'coerce'   => 1,
+    'default'  => sub {
+        my $self = shift;
+        return $self->directory->child('index.lock');
+    },
+);
+
 has 'pretty_json' => (
     'is'      => 'ro',
     'isa'     => 'Bool',
@@ -100,6 +110,8 @@ sub _store_in_index {
     # Meaningless extension
     my $filename = sha1_hex($id) . '.' . $self->file_extension;
 
+    my $lock = $self->lock_file->openw();
+    flock($lock, 2);
     # Store in the index
     my $repo_index = $self->repo_index;
     $repo_index->{$id} = $filename;
@@ -127,6 +139,8 @@ sub _retrieve_from_index {
 
 sub _remove_from_index {
     my ( $self, $id ) = @_;
+    my $lock = $self->lock_file->openw();
+    flock($lock, 2);
     my $repo_index = $self->repo_index;
     delete $repo_index->{$id};
     $self->_save_index($repo_index);
