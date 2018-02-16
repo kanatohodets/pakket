@@ -10,6 +10,7 @@ use Path::Tiny        qw< path >;
 use Log::Any          qw< $log >;
 use Types::Path::Tiny qw< Path AbsPath >;
 use Digest::SHA       qw< sha1_hex >;
+use File::NFSLock;
 use Regexp::Common    qw< URI >;
 use Pakket::Utils     qw< encode_json_canonical encode_json_pretty >;
 use Pakket::Constants qw< PAKKET_PACKAGE_SPEC >;
@@ -110,8 +111,7 @@ sub _store_in_index {
     # Meaningless extension
     my $filename = sha1_hex($id) . '.' . $self->file_extension;
 
-    my $lock = $self->lock_file->openw();
-    flock($lock, 2);
+    my $lock = File::NFSLock->new($self->lock_file->stringify, 2, undef, 1000);
     # Store in the index
     my $repo_index = $self->repo_index;
     $repo_index->{$id} = $filename;
@@ -139,8 +139,7 @@ sub _retrieve_from_index {
 
 sub _remove_from_index {
     my ( $self, $id ) = @_;
-    my $lock = $self->lock_file->openw();
-    flock($lock, 2);
+    my $lock = File::NFSLock->new($self->lock_file->stringify, 2, undef, 1000);
     my $repo_index = $self->repo_index;
     delete $repo_index->{$id};
     $self->_save_index($repo_index);
