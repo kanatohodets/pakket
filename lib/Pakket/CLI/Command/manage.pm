@@ -20,26 +20,36 @@ use Pakket::Constants qw<
     PAKKET_VALID_PHASES
 >;
 
+use constant {
+    'COMMANDS' => { map +( $_ => 1 ), qw<
+        add-package
+        remove-package
+        show-package
+        remove-parcel
+        add-deps
+        remove-deps
+        list-deps
+        list-specs
+        list-sources
+        list-parcels
+    > },
+};
+
 sub abstract    { 'Manage Pakket packages and repositories' }
-sub description { return <<'_END_DESC';
+sub description {
+
+    my $commands_string = join "\n", map "* $_", sort keys %{ COMMANDS() };
+
+    return <<"_END_DESC";
 This command manages Pakket packages across repositories.
 It allows you to add new specs, sources, and packages, as well
 as edit existing ones, and view your repositories.
+
+The following subcommands are available:
+$commands_string
+
 _END_DESC
 }
-
-my %commands = map +( $_ => 1 ), qw<
-    add-package
-    remove-package
-    show-package
-    remove-parcel
-    add-deps
-    remove-deps
-    list-deps
-    list-specs
-    list-sources
-    list-parcels
->;
 
 sub opt_spec {
     return (
@@ -187,14 +197,14 @@ sub _validate_repos {
 }
 
 sub _validate_arg_command {
-    my $self     = shift;
-    my @cmd_list = sort keys %commands;
+    my $self         = shift;
+    my $cmd_list_str = join ' / ', sort keys %{ COMMANDS() };
 
     my $command = shift @{ $self->{'args'} }
-        or $self->usage_error( "Must pick action (@{[ join '/', @cmd_list ]})" );
+        or $self->usage_error("Must pick action ($cmd_list_str)");
 
-    $commands{$command}
-        or $self->usage_error( "Wrong command (@{[ join '/', @cmd_list ]})" );
+    COMMANDS()->{$command}
+        or $self->usage_error("Wrong command ($cmd_list_str)");
 
     $self->{'command'} = $command;
 
