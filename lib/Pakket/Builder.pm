@@ -417,6 +417,7 @@ sub run_build {
 
         if ( $package->build_opts->{'pre_build'} ) {
             foreach my $cmd_set ( @{ $package->build_opts->{'pre_build'} } ) {
+                $cmd_set = $self->get_configure_flags($cmd_set, \%env_vars);
                 $self->run_command(
                     $package_src_dir,
                     $cmd_set,
@@ -436,6 +437,7 @@ sub run_build {
 
         if ( $package->build_opts->{'post_build'} ) {
             foreach my $cmd_set ( @{ $package->build_opts->{'post_build'} } ) {
+                $cmd_set = $self->get_configure_flags($cmd_set, \%env_vars);
                 $self->run_command(
                     $package_src_dir,
                     $cmd_set,
