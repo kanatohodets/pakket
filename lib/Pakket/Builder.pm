@@ -420,6 +420,7 @@ sub run_build {
                 $self->run_command(
                     $package_src_dir,
                     $cmd_set,
+                    {'env' => \%env_vars},
                 );
             }
         }
@@ -438,6 +439,7 @@ sub run_build {
                 $self->run_command(
                     $package_src_dir,
                     $cmd_set,
+                    {'env' => \%env_vars},
                 );
             }
         }
