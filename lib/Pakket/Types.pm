@@ -22,6 +22,7 @@ sub _coerce_backend_from_str {
     $uri = lc($uri);
 
     my ($scheme) = $uri =~ m{^ ( [a-zA-Z0-9_]+ ) :// }xms;
+    $scheme = "http" if ($scheme eq "https");
     my $class    = "Pakket::Repository::Backend::$scheme";
 
     eval { require_module($class); 1; } or do {
