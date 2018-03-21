@@ -78,6 +78,10 @@ sub install {
         @packages or return;
     }
 
+    if (!$self->check_packages_in_parcel_repo(\@packages)) {
+        return;
+    }
+
     my $installer_cache = {};
 
     foreach my $package (@packages) {
@@ -353,6 +357,19 @@ sub set_latest_version_for_undefined {
         }
     }
     return @output;
+}
+
+sub check_packages_in_parcel_repo {
+    my ($self, $packages) = @_;
+    my %all = map {$_=>1} @{$self->parcel_repo->all_object_ids()};
+    my $rs = 1;
+    for my $package ( @{$packages} ) {
+        if (!$all{$package->id}) {
+            $log->error(sprintf('Package %s doesn\'t exsist in parcel repo', $package->id));
+           $rs = 0;
+        }
+    }
+    return $rs;
 }
 
 __PACKAGE__->meta->make_immutable;
