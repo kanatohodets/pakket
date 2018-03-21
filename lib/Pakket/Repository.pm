@@ -5,8 +5,8 @@ use Moose;
 use MooseX::StrictConstructor;
 
 use Path::Tiny;
-use Archive::Any;
 use Archive::Tar;
+use Archive::Extract;
 use File::chdir;
 use Carp ();
 use Log::Any      qw< $log >;
@@ -52,8 +52,15 @@ sub retrieve_package_file {
     }
 
     my $dir = Path::Tiny->tempdir( 'CLEANUP' => 1 );
-    my $arch = Archive::Any->new( $file->stringify );
-    $arch->extract($dir);
+
+    # Prefer system 'tar' instead of 'in perl' archive extractor,
+    # because 'tar' memory consumption is very low,
+    # but perl extractor is really  greed for memory
+    # and we got the error "Out of memory" on KVMs
+    $Archive::Extract::PREFER_BIN = 1;
+
+    my $arch = Archive::Extract->new('archive'=>$file->stringify, 'type'=>'tgz');
+    $arch->extract('to' => $dir);
 
     return $dir;
 }
