@@ -144,20 +144,17 @@ sub activate_work_dir {
         or croak( $log->error(
             'Could not atomically activate new installation (symlink rename failed)'
         ) );
+
+    $self->remove_old_libraries($work_final);
 }
 
 sub remove_old_libraries {
-    my $self = shift;
+    my ($self, $work_dir) = @_;
 
-    my $keep = 1;
-
-    my @dirs = sort { $a->stat->mtime <=> $b->stat->mtime }
-        grep +( $_->basename ne 'active' && $_->is_dir ),
+    my @dirs = grep +( $_->basename ne 'active' && $_ ne $work_dir && $_->is_dir ),
         $self->libraries_dir->children;
 
-    my $num_dirs = @dirs;
     foreach my $dir (@dirs) {
-        $num_dirs-- <= $keep and last;
         $log->debug("Removing old directory: $dir");
         path($dir)->remove_tree( { 'safe' => 0 } );
     }

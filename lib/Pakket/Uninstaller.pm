@@ -72,8 +72,6 @@ sub uninstall {
                 @packages_for_uninstall )
     );
 
-    $self->remove_old_libraries();
-
     return;
 }
 

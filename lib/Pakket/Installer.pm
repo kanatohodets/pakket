@@ -108,8 +108,6 @@ sub install {
     log_success( 'Finished installing: ' . join ', ',
         map $_->full_name, @packages );
 
-    $self->remove_old_libraries;
-
     return;
 }
 
