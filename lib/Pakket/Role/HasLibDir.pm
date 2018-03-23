@@ -8,6 +8,7 @@ use Carp qw< croak >;
 use Path::Tiny qw< path  >;
 use Types::Path::Tiny qw< Path  >;
 use File::Copy::Recursive qw< dircopy >;
+use File::Lockfile;
 use Time::HiRes qw< time >;
 use Log::Any qw< $log >;
 use English qw< -no_match_vars >;
@@ -43,6 +44,10 @@ has 'work_dir' => (
     'builder' => '_build_work_dir',
 );
 
+has 'lock' => (
+    'is'      => 'rw',
+);
+
 sub _build_libraries_dir {
     my $self = shift;
 
@@ -62,6 +67,8 @@ sub _build_active_dir {
 
 sub _build_work_dir {
     my $self = shift;
+
+    $self->lock_lib_directory();
 
     my $template = sprintf("%s/work_%s_%s_XXXXX", $self->libraries_dir, $PID, time());
     my $work_dir = Path::Tiny->tempdir($template, TMPDIR => 0, CLEANUP => 1);
@@ -153,6 +160,26 @@ sub remove_old_libraries {
         $num_dirs-- <= $keep and last;
         $log->debug("Removing old directory: $dir");
         path($dir)->remove_tree( { 'safe' => 0 } );
+    }
+}
+
+sub lock_lib_directory {
+    my $self = shift;
+
+    my $lock = File::Lockfile->new('lock.pid', $self->pakket_dir);
+    if (my $pid = $lock->check) {
+        croak( $log->critical(
+            "Seems that pakket for is already running with PID: $pid",
+        ) );
+    }
+    $lock->write;
+    $self->lock($lock);
+}
+
+sub DEMOLISH {
+    my $self = shift;
+    if ($self->lock) {
+        $self->lock->remove;
     }
 }
 

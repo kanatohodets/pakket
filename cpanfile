@@ -11,6 +11,7 @@ requires 'File::Copy::Recursive';
 requires 'File::Find';
 requires 'File::HomeDir';
 requires 'File::NFSLock';
+requires 'File::Lockfile';
 requires 'Getopt::Long', '>= 2.39';
 requires 'Getopt::Long::Descriptive';
 requires 'JSON::MaybeXS';
