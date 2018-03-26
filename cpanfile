@@ -30,6 +30,8 @@ requires 'Ref::Util';
 requires 'Regexp::Common';
 requires 'System::Command';
 requires 'Types::Path::Tiny';
+requires 'Time::HiRes';
+requires 'Time::Format';
 requires 'version', '>= 0.77';
 requires 'Archive::Tar::Wrapper';
 requires 'Digest::SHA';

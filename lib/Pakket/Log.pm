@@ -8,6 +8,8 @@ use Log::Dispatch;
 use Path::Tiny qw< path >;
 use Log::Any   qw< $log >;
 use Term::GentooFunctions qw< ebegin eend >;
+use Time::HiRes qw< gettimeofday >;
+use Time::Format qw< %time >;
 
 use constant {
     'DEBUG_LOG_LEVEL'    => 3,
@@ -117,7 +119,8 @@ sub _build_logger {
         'mode'      => '>>',
         'callbacks' => [ sub {
             my %data = @_;
-            return sprintf '[%s] %s', scalar localtime, $data{'message'};
+            my $localtime = gettimeofday;
+            return sprintf '[%s] %s', $time{'yyyy-mm-dd hh:mm:ss.mmm', $localtime} , $data{'message'};
         } ],
     ];
 }
