@@ -126,6 +126,9 @@ sub execute {
         return $installer->show_installed();
     }
 
+    $log->debug("----------------------------------------------------------------");
+    $log->debug("pakket ".join(" ", @ARGV));
+
     my $installer = _create_installer($opt);
     return $installer->install( @{ $opt->{'packages'} } );
 }
