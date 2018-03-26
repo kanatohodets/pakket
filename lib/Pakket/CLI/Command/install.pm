@@ -92,6 +92,7 @@ sub opt_spec {
         ],
         [ 'input-file=s',   'install everything listed in this file' ],
         [ 'config|c=s',     'configuration file' ],
+        [ 'log-file=s',     'log file' ],
         [ 'show-installed', 'print list of installed packages' ],
         [ 'ignore-failures', 'Continue even if some installs fail' ],
         [ 'force|f',        'force reinstall if package exists' ],
@@ -106,10 +107,12 @@ sub opt_spec {
 sub validate_args {
     my ( $self, $opt, $args ) = @_;
 
-    Log::Any::Adapter->set( 'Dispatch',
-        'dispatcher' => Pakket::Log->build_logger( $opt->{'verbose'} ) );
+    $opt->{'config'} = $self->_determine_config($opt);
+    my $log_file = $opt->{'log_file'} || $opt->{'config'}{'log_file'};
 
-    $opt->{'config'}     = $self->_determine_config($opt);
+    Log::Any::Adapter->set( 'Dispatch',
+        'dispatcher' => Pakket::Log->build_logger( $opt->{'verbose'}, $log_file ) );
+
     $opt->{'packages'}   = $self->_determine_packages( $opt, $args );
 
     $opt->{'config'}{'env'}{'cli'} = 1;
@@ -156,6 +159,7 @@ __END__
         --from STR           directory to install the packages from
         --input-file STR     install everything listed in this file
         -c STR --config STR  configuration file
+        --log-file STR       log file
         --show-installed     print list of installed packages
         --ignore-failures    Continue even if some installs fail
         -f --force           force reinstall if package exists
