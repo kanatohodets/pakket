@@ -114,6 +114,10 @@ sub _build_logger {
         'min_level' => 'debug',
         'filename'  => $file,
         'newline'   => 1,
+        'callbacks' => [ sub {
+            my %data = @_;
+            return sprintf '[%s] %s', scalar localtime, $data{'message'};
+        } ],
     ];
 }
 
