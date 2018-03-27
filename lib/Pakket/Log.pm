@@ -10,6 +10,7 @@ use Log::Any   qw< $log >;
 use Term::GentooFunctions qw< ebegin eend >;
 use Time::HiRes qw< gettimeofday >;
 use Time::Format qw< %time >;
+use JSON::MaybeXS qw< encode_json >;
 
 use constant {
     'DEBUG_LOG_LEVEL'    => 3,
@@ -90,6 +91,7 @@ sub build_logger {
         'outputs' => [
             $class->_build_logger($file),
             $class->_cli_logger( $verbose // 0 ),
+            $class->_syslog_logger(),
         ],
     );
 
@@ -151,6 +153,19 @@ sub _cli_logger {
         'min_level' => $screen_level,
         'newline'   => 1,
         'utf8'      => 1,
+    ];
+}
+
+sub _syslog_logger {
+    return [
+        'Syslog',
+        'min_level' => 'warning',
+        'ident'     => 'pakket',
+        'callbacks' => [ sub {
+            my %data = @_;
+            $data{'name'} = 'pakket';
+            return encode_json(\%data);
+        } ],
     ];
 }
 
