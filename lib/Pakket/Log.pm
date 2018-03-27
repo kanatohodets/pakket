@@ -120,7 +120,7 @@ sub _build_logger {
         'callbacks' => [ sub {
             my %data = @_;
             my $localtime = gettimeofday;
-            return sprintf '[%s] %s', $time{'yyyy-mm-dd hh:mm:ss.mmm', $localtime} , $data{'message'};
+            return sprintf '[%s] %s: %s', $time{'yyyy-mm-dd hh:mm:ss.mmm', $localtime}, $data{'level'}, $data{'message'};
         } ],
     ];
 }
