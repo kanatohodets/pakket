@@ -321,10 +321,15 @@ sub drop_installed_packages {
     my @packages = @_;
     my @out;
     for my $package (@packages) {
-        if ($self->installed_packages->{$package->full_name}) {
-            $log->infof( '%s already installed', $package->full_name );
-        } else {
+        if (!$self->installed_packages->{$package->full_name}) {
             push @out, $package;
+        }
+    }
+    if (!@out) {
+        if (0+@packages == 1) {
+            $log->infof('%s already installed', $packages[0]->full_name);
+        } else {
+            $log->infof('All packages are already installed');
         }
     }
     return @out;
