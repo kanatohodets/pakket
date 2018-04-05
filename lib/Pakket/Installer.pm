@@ -368,7 +368,7 @@ sub check_packages_in_parcel_repo {
     my $rs = 1;
     for my $package ( @{$packages} ) {
         if (!$all{$package->id}) {
-            $log->error(sprintf('Package %s doesn\'t exsist in parcel repo', $package->id));
+            $log->error(sprintf('Package %s doesn\'t exist in parcel repo', $package->id));
            $rs = 0;
         }
     }
