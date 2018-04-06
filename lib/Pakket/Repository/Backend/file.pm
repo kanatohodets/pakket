@@ -58,6 +58,12 @@ has 'pretty_json' => (
     'default' => sub {1},
 );
 
+has 'mangle_filename' => (
+    'is'      => 'ro',
+    'isa'     => 'Bool',
+    'default' => sub {0},
+);
+
 sub new_from_uri {
     my ( $class, $uri ) = @_;
 
@@ -107,9 +113,14 @@ sub has_object {
 sub _store_in_index {
     my ( $self, $id ) = @_;
 
-    # Decide on a proper filename for $id
-    # Meaningless extension
-    my $filename = sha1_hex($id) . '.' . $self->file_extension;
+    my $name;
+    if ($self->mangle_filename) {
+        $name = sha1_hex($id);
+    } else {
+        $name = $id;
+        $name =~ s/[^a-zA-Z0-9\.]/-/g;
+    }
+    my $filename = $name . '.' . $self->file_extension;
 
     my $lock = File::NFSLock->new($self->lock_file->stringify, 2, undef, 1000);
     # Store in the index
@@ -273,6 +284,16 @@ This is a boolean controlling whether the index file should store
 pleasantly-readable JSON.
 
 Default: B<1>.
+
+=head2 mangle_filename
+
+When creating file, use sha1(full_package_name) as name of file.
+By default uses full_package_name as filename.
+
+This flag is useful when your system doesn't support long filenames. Or for
+some another reason you don't like full_package_name as filename.
+
+Default: B<< C<0> >>.
 
 =head1 METHODS
 
