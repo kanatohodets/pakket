@@ -23,9 +23,10 @@ sub retrieve_package_spec {
 
     my $config;
     eval {
-        my $config_raw = decode_json($spec_str);
+        my $json = JSON::MaybeXS->new(relaxed => 1);
+        my $config_raw = $json->decode($spec_str);
         $config = exists $config_raw->{'content'}
-            ? decode_json $config_raw->{'content'}
+            ? $json->decode($config_raw->{'content'})
             : $config_raw;
         1;
     } or do {
