@@ -73,10 +73,12 @@ sub install {
 
     $self->installed_packages($self->load_installed_packages($self->active_dir));
 
-    if ( !$self->force ) {
-        @packages = $self->drop_installed_packages(@packages);
-        @packages or return;
+    if ( $self->force ) {
+        $self->remove_packages_from_list_of_already_installed(@packages);
     }
+
+    @packages = $self->drop_installed_packages(@packages);
+    @packages or return;
 
     if (!$self->check_packages_in_parcel_repo(\@packages)) {
         return;
@@ -333,6 +335,17 @@ sub drop_installed_packages {
         }
     }
     return @out;
+}
+
+sub remove_packages_from_list_of_already_installed {
+    my $self = shift;
+    my @packages = @_;
+    for my $package (@packages) {
+        if ($self->installed_packages->{$package->full_name}) {
+            $log->infof('%s already installed, but enabled --force, reinstalling it', $package->full_name);
+            delete $self->installed_packages->{$package->full_name};
+        }
+    }
 }
 
 sub set_latest_version_for_undefined {
