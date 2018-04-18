@@ -228,6 +228,11 @@ sub remove_location {
     my $url = '/remove/location?id=' . uri_escape($id);
     my $full_url = $self->base_url . $url;
     my $response = $self->http_client->get($full_url);
+
+    if ( !$response->{'success'} ) {
+        croak( $log->criticalf( 'Could not remove %s, url: %s, err: %s', $id, $response->{'url'}, $response->{'reason'}) );
+    }
+
     return $response->{'success'};
 }
 
@@ -236,6 +241,11 @@ sub remove_content {
     my $url = '/remove/content?id=' . uri_escape($id);
     my $full_url = $self->base_url . $url;
     my $response = $self->http_client->get($full_url);
+
+    if ( !$response->{'success'} ) {
+        croak( $log->criticalf( 'Could not remove %s, url: %s, err: %s', $id, $response->{'url'}, $response->{'reason'}) );
+    }
+
     return $response->{'success'};
 }
 
