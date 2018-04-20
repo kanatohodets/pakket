@@ -11,9 +11,9 @@ use Path::Tiny qw< path >;
 our @EXPORT_OK = (qw< gen_repo_config >);
 
 my %file_ext = (
-    'spec'   => 'ini',
-    'source' => 'spkt',
-    'parcel' => 'pkt',
+    'spec'   => 'json',
+    'source' => 'tar.gz',
+    'parcel' => 'tar.gz',
 );
 
 sub gen_repo_config {
