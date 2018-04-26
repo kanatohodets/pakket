@@ -14,6 +14,8 @@ use constant {
     ],
 };
 
+set content_type => 'application/json';
+
 sub setup {
     my ( $class, $config_file ) = @_;
 
