@@ -1,4 +1,5 @@
 package Pakket::Downloader::ByUrl;
+# ABSTRACT: Downloader virtual constuctor (construct correct Downloader implementation from url)
 
 use Pakket::Downloader::Git;
 use Pakket::Downloader::Http;
