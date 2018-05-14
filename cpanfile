@@ -14,6 +14,7 @@ requires 'File::NFSLock';
 requires 'File::Lockfile';
 requires 'Getopt::Long', '>= 2.39';
 requires 'Getopt::Long::Descriptive';
+requires 'Git::Wrapper';
 requires 'JSON::MaybeXS';
 requires 'Log::Any', '>= 0.05';
 requires 'Log::Any::Adapter::Dispatch', '>= 0.06';
