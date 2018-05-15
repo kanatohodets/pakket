@@ -43,26 +43,34 @@ sub setup {
                 });
     };
 
-    get '/info_detailes' => sub {
-        my $packages;
-        my @repo_ids;
+    get '/all_packages' => sub {
+        my %packages;
         for my $repo (@repos) {
-            my $repo_id = $repo->{'repo_config'}{'path'};
-            push @repo_ids, $repo_id;
             my $ids = $repo->{'repo'}->all_object_ids();
             for my $package (@{$ids}) {
-                $packages->{$package}{$repo_id}=1;
+                $packages{$package}{$repo}=1;
             }
         }
-        for my $package (keys %{$packages}) {
-            for my $repo (@repo_ids) {
-                if (! exists $packages->{$package}{$repo}) {
-                    $packages->{$package}{$repo} = 0;
+        my %output;
+        for my $repo (@repos) {
+            my $type = $repo->{'repo_config'}{'type'};
+            if ($type eq 'spec' or $type eq 'source') {
+                for my $package (keys %packages) {
+                    $output{$package}{$type} = $packages{$package}{$repo} // 0;
+                }
+            } else {
+                my ($p1,$p2,$p3) = split '/', $repo->{'repo_config'}{'path'};
+                for my $package (keys %packages) {
+                    $output{$package}{$p3}{$p2} = $packages{$package}{$repo} // 0;
                 }
             }
         }
+        my @sorted_output;
+        for my $package (sort keys %output) {
+            push @sorted_output, [$package, $output{$package}];
+        }
 
-        return encode_json($packages);
+        return encode_json(\@sorted_output);
     };
 
 }
