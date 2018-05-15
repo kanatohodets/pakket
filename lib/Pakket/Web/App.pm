@@ -27,8 +27,10 @@ sub setup {
 
     my $config = decode_json( Path::Tiny::path($config_file)->slurp_utf8 );
 
+    my @repos;
     foreach my $repo_config ( @{ $config->{'repositories'} } ) {
-        Pakket::Web::Repo->create($repo_config);
+        my $repo = Pakket::Web::Repo->create($repo_config);
+        push @repos, {'repo_config' => $repo_config, 'repo' => $repo};
     }
 
     get '/info' => sub {
@@ -39,6 +41,28 @@ sub setup {
                 'version' => $Pakket::Web::App::VERSION,
                 'repositories' => [@repositories],
                 });
+    };
+
+    get '/info_detailes' => sub {
+        my $packages;
+        my @repo_ids;
+        for my $repo (@repos) {
+            my $repo_id = $repo->{'repo_config'}{'path'};
+            push @repo_ids, $repo_id;
+            my $ids = $repo->{'repo'}->all_object_ids();
+            for my $package (@{$ids}) {
+                $packages->{$package}{$repo_id}=1;
+            }
+        }
+        for my $package (keys %{$packages}) {
+            for my $repo (@repo_ids) {
+                if (! exists $packages->{$package}{$repo}) {
+                    $packages->{$package}{$repo} = 0;
+                }
+            }
+        }
+
+        return encode_json($packages);
     };
 
 }

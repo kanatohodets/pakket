@@ -133,6 +133,7 @@ sub create {
             };
         }
     };
+    return $repo;
 }
 
 1;
