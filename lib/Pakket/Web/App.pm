@@ -73,6 +73,12 @@ sub setup {
         return encode_json(\@sorted_output);
     };
 
+    get '/status' => sub {
+        set content_type => 'text/html';
+        set auto_page => 1;
+        template 'status';
+    };
+
 }
 
 1;
