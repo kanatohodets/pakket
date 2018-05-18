@@ -53,7 +53,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script>
     $.ajax('/all_packages').done(function(data) {
-      const parsedData = JSON.parse(data);
+      const parsedData = data;
       // taking pakket #1 and getting columns metadata from it
       const keys = Object.keys(parsedData[0][1]);
       const desiredOrder = ['spec', 'source', '5.24.0', '5.24.3', '5.26.2'];
