@@ -16,7 +16,7 @@ use English               qw< -no_match_vars >;
 use Pakket::Repository::Parcel;
 use Pakket::Package;
 use Pakket::PackageQuery;
-use Pakket::Log       qw< log_success log_fail >;
+use Pakket::Log       qw< log_success log_fail log_raw >;
 use Pakket::Types     qw< PakketRepositoryBackend >;
 use Pakket::Utils     qw< is_writeable >;
 use Pakket::Constants qw<
@@ -33,6 +33,12 @@ with qw<
 >;
 
 has 'force' => (
+    'is'      => 'ro',
+    'isa'     => 'Bool',
+    'default' => sub {0},
+);
+
+has 'silent' => (
     'is'      => 'ro',
     'isa'     => 'Bool',
     'default' => sub {0},
@@ -60,33 +66,23 @@ has 'installed_packages' => (
 );
 
 sub install {
-    my ( $self, @packages ) = @_;
+    my ( $self, @pack_list ) = @_;
 
-    if ( !@packages ) {
+    unless ( @pack_list ) {
         $log->notice('Did not receive any parcels to deliver');
         return;
     }
 
-    @packages = $self->set_latest_version_for_undefined(@packages);
+    my $packages = $self->_preprocess_packages_list(@pack_list);
+    @$packages or return;
 
-    foreach (@packages) { $self->requirements->{$_->short_name} = $_ };
-
-    $self->installed_packages($self->load_installed_packages($self->active_dir));
-
-    if ( $self->force ) {
-        $self->remove_packages_from_list_of_already_installed(@packages);
-    }
-
-    @packages = $self->drop_installed_packages(@packages);
-    @packages or return;
-
-    if (!$self->check_packages_in_parcel_repo(\@packages)) {
+    if (!$self->check_packages_in_parcel_repo($packages)) {
         return;
     }
 
     my $installer_cache = {};
 
-    foreach my $package (@packages) {
+    foreach my $package (@$packages) {
         eval {
             $self->install_package(
                 $package,
@@ -96,7 +92,7 @@ sub install {
             1;
         } or do {
             $self->ignore_failures or die $@;
-            $log->warnf( 'Failed to install %s, skipping', $package->full_name);
+            $log->warnf('Failed to install %s, skipping', $package->full_name);
         };
     }
 
@@ -108,9 +104,27 @@ sub install {
     );
 
     log_success( 'Finished installing: ' . join ', ',
-        map $_->full_name, @packages );
+        map $_->full_name, @$packages );
 
     return;
+}
+
+sub dry_run {
+    my ($self, @pack_list) = @_;
+
+    unless ( @pack_list ) {
+        $log->notice('Did not receive any parcels to check');
+        return;
+    }
+
+    $self->{silent} = 1;
+    my $packages = $self->_preprocess_packages_list(@pack_list);
+    @$packages or return;
+
+    foreach my $package (@$packages) {
+        #        $log->info($package->full_name);
+        log_raw($package->full_name);
+    }
 }
 
 sub try_to_install_package {
@@ -327,7 +341,7 @@ sub drop_installed_packages {
             push @out, $package;
         }
     }
-    if (!@out) {
+    if (!@out and !$self->silent) {
         if (0+@packages == 1) {
             $log->infof('%s already installed', $packages[0]->full_name);
         } else {
@@ -342,7 +356,7 @@ sub remove_packages_from_list_of_already_installed {
     my @packages = @_;
     for my $package (@packages) {
         if ($self->installed_packages->{$package->full_name}) {
-            $log->infof('%s already installed, but enabled --force, reinstalling it', $package->full_name);
+            $log->infof('%s already installed, but enabled --force, reinstalling it', $package->full_name) unless $self->silent;
             delete $self->installed_packages->{$package->full_name};
         }
     }
@@ -386,6 +400,26 @@ sub check_packages_in_parcel_repo {
         }
     }
     return $rs;
+}
+
+sub _preprocess_packages_list {
+    my ($self, @packages) = @_;
+
+    return \@packages unless @packages;
+
+    @packages = $self->set_latest_version_for_undefined(@packages);
+
+    foreach (@packages) { $self->requirements->{$_->short_name} = $_ };
+
+    $self->installed_packages($self->load_installed_packages($self->active_dir));
+
+    if ( $self->force ) {
+        $self->remove_packages_from_list_of_already_installed(@packages);
+    }
+
+    @packages = $self->drop_installed_packages(@packages);
+
+    return \@packages;
 }
 
 __PACKAGE__->meta->make_immutable;

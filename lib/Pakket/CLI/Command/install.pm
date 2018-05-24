@@ -82,24 +82,16 @@ sub _determine_packages {
 
 sub opt_spec {
     return (
-        [
-            'to=s',
-            'directory to install the package in',
-        ],
-        [
-            'from=s',
-            'directory to install the packages from',
-        ],
-        [ 'input-file=s',   'install everything listed in this file' ],
-        [ 'config|c=s',     'configuration file' ],
-        [ 'log-file=s',     'log file' ],
-        [ 'show-installed', 'print list of installed packages' ],
+        [ 'to=s',            'directory to install the package in', ],
+        [ 'from=s',          'directory to install the packages from', ],
+        [ 'input-file=s',    'install everything listed in this file' ],
+        [ 'config|c=s',      'configuration file' ],
+        [ 'log-file=s',      'log file' ],
+        [ 'show-installed',  'print list of installed packages' ],
         [ 'ignore-failures', 'Continue even if some installs fail' ],
-        [ 'force|f',        'force reinstall if package exists' ],
-        [
-            'verbose|v+',
-            'verbose output (can be provided multiple times)',
-        ],
+        [ 'force|f',         'force reinstall if package exists' ],
+        [ 'verbose|v+',      'verbose output (can be provided multiple times)', ],
+        [ 'dry-run|n',       'dry-run installation and return only packages to be installed', ],
     );
 }
 
@@ -129,6 +121,9 @@ sub execute {
     $log->debug("pakket ".join(" ", @ARGV));
 
     my $installer = _create_installer($opt);
+
+    return $installer->dry_run( @{ $opt->{'packages'} } ) if $opt->{dry_run};
+
     return $installer->install( @{ $opt->{'packages'} } );
 }
 
