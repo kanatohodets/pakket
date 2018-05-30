@@ -76,7 +76,7 @@ sub setup {
     get '/status' => sub {
         set content_type => 'text/html';
         set auto_page => 1;
-        template 'status';
+        template 'Pakket/status';
     };
 
 }
