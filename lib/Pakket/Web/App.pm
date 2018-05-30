@@ -76,6 +76,8 @@ sub setup {
     get '/status' => sub {
         set content_type => 'text/html';
         set auto_page => 1;
+        my $dirname = dirname(__FILE__);
+        set views => path($dirname, 'views');
         template 'Pakket/status';
     };
 
