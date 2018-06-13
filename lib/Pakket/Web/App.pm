@@ -14,6 +14,8 @@ use constant {
     ],
 };
 
+# TODO: while testing I see, that content type is not really
+# propagated into endpoints every time
 set content_type => 'application/json';
 
 sub setup {
@@ -34,6 +36,7 @@ sub setup {
     }
 
     get '/info' => sub {
+        set content_type => 'application/json';
         my @repositories =  map { { 'type' => $_->{'type'},
                                     'path' => $_->{'path'} } }
                                 @{ $config->{'repositories'} };
@@ -44,6 +47,7 @@ sub setup {
     };
 
     get '/all_packages' => sub {
+        set content_type => 'application/json';
         my %packages;
         for my $repo (@repos) {
             my $ids = $repo->{'repo'}->all_object_ids();
@@ -78,7 +82,7 @@ sub setup {
         set auto_page => 1;
         my $dirname = dirname(__FILE__);
         set views => path($dirname, 'views');
-        template 'Pakket/status';
+        template 'status';
     };
 
 }
