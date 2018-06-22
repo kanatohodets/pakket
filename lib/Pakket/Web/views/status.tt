@@ -44,6 +44,12 @@
     .hidden {
       visibility: hidden;
     }
+    .version {
+      background: transparent;
+      font-weight: normal;
+      text-align: left;
+      padding-left: 16px;
+    }
   </style>
 </head>
 <body>
@@ -111,7 +117,7 @@
         });
 
         let tableHead = '<tr>';
-        tableHead += '<td class="name" rowspan="2">module name</td>';
+        tableHead += '<td class="name" rowspan="2" colspan="2">module name</td>';
         desiredOrder.forEach((column) => {
           // calculating colspan and rowspan
           let colspan = 1;
@@ -139,44 +145,95 @@
 
         // calculating and rendering body
         let tableBody = '';
+        const pakketsMap = new Map();
+        // calculating pakketsMap - no rendering yet
         data.forEach((pakket) => {
-          let problematicPakket = false;
-          let tableRow = `<td class="name">${pakket[0]}</td>`;
-          const renderQueue = [];
-          desiredOrder.forEach((column) => {
-            if (strIsPerlVersion(column)){
-              OSmetadata.forEach((os) => {
-                renderQueue.push(pakket[1][column][os] ? '+' : '-');
-              });
-            } else {
-                renderQueue.push(pakket[1][column] ? '+' : '-');
-            }
-          });
-          // rendering queue
-          renderQueue.forEach((val) => {
-            tableRow += `<td ${(val === '+' ? '' : ('class="' + CSS_CLASS_MISSING_PAKKET + '"'))}>${val}</td>`;
-          });
-          // figuring out if pakket is problematic + reflecting in <tr> css class
-          problematicPakket = !!renderQueue.filter(val => val === '-').length;
-          tableBody += `<tr class="${problematicPakket ? CSS_CLASS_BAD_PAKKET : CSS_CLASS_FINE_PAKKET}">${tableRow}</tr>`;
+          const nameFull = pakket[0];
+          const namePieces = nameFull.split('=');
+          const nameShort = namePieces[0];
+          const version = namePieces[1];
+          let mapVersions = pakketsMap.get(nameShort);
+          mapVersions = mapVersions || [];
+          if (mapVersions) {
+            mapVersions.push(version);
+          }
+          pakketsMap.set(nameShort, mapVersions);
         });
+        // actual rendering to a string
+        data.forEach((pakket) => {
+          const namePieces = pakket[0].split('=');
+          tableBody += columnRenderer({
+            name: namePieces[0],
+            version: namePieces[1],
+            order: desiredOrder,
+            os_meta: OSmetadata,
+            data: pakket,
+            versions_all: pakketsMap.get(namePieces[0])
+          });
+        });
+
         // required on re-render
         $('#tbody').empty();
         $('#tbody').append(`${tableBody}`);
       }
 
+      // helper functions
+      // Is the string containing Perl version?
+      function strIsPerlVersion(str) {
+        return !isNaN(parseInt(str));
+      }
+      // Pakket table column renderer
+      function columnRenderer(config) {
+        const renderQueue = [];
+        let problematicPakket = false;
+        let versionsUI = '';
+        const versionsArr = config.versions_all;
+        versionsArr.forEach((version) => {
+          versionsUI += `<option value="${version}" ${(version === config.version) ? 'selected' : ''}>${version}</option>`;
+        });
+        let tableRow = `<td class="name">${config.name}</td>
+          <td class="version">${(versionsArr.length === 1 ? versionsArr[0] : ('<select data-name="' + config.name.replace(/[\/\.\:]/g,'') + '">' + versionsUI + '</select>'))}</td>`;
+        config.order.forEach((column) => {
+          if (strIsPerlVersion(column)){
+            config.os_meta.forEach((os) => {
+              renderQueue.push(config.data[1][column][os] ? '+' : '-');
+            });
+          } else {
+            renderQueue.push(config.data[1][column] ? '+' : '-');
+          }
+        });
+        // rendering queue
+        renderQueue.forEach((val) => {
+          tableRow += `<td ${(val === '+' ? '' : ('class="' + CSS_CLASS_MISSING_PAKKET + '"'))}>${val}</td>`;
+        });
+        // figuring out if pakket is problematic + reflecting in <tr> css class
+        problematicPakket = !!renderQueue.filter(val => val === '-').length;
+        const latestVersion = config.versions_all[config.versions_all.length - 1];
+        return `<tr ${config.version !== latestVersion ? 'style="display: none;"' : ''}
+          id="pak--${config.name.replace(/[\/\.\:]/g,'')}-${config.version.replace(/[\/\.\:]/g,'')}"
+          class="${problematicPakket ? CSS_CLASS_BAD_PAKKET : CSS_CLASS_FINE_PAKKET}">${tableRow}</tr>`;
+      }
+
+      $('#tbody').on('change', '.version select', function(e){
+        const $target = $(e.target);
+        const value = $target.val();
+        const pakketName = $target.data('name');
+        // hiding current row
+        $target.parents('tr').hide();
+        // showing new one
+        $(`#pak--${pakketName}-${value.replace(/[\/\.\:]/g,'')}`).show();
+      });
+
       $('#only-problematic').on('change', function(){
+        // as we have grouping now - we need to show mandatory
+        // broken pakkets initially
+        $('.bad').show();
         if ($(this).is(':checked')) {
           $(`.${CSS_CLASS_FINE_PAKKET}`).hide();
         } else {
           $(`.${CSS_CLASS_FINE_PAKKET}`).show();
         }
       });
-
-      // helper functions
-      function strIsPerlVersion(str) {
-        return !isNaN(parseInt(str));
-      }
 
     })();
   </script>
