@@ -166,7 +166,6 @@
       }
 
       $('#only-problematic').on('change', function(){
-        console.log(`.${CSS_CLASS_FINE_PAKKET}`);
         if ($(this).is(':checked')) {
           $(`.${CSS_CLASS_FINE_PAKKET}`).hide();
         } else {
