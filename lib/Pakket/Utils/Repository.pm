@@ -26,6 +26,7 @@ sub gen_repo_config {
 
         return [
             'HTTP',
+            'scheme'    => $protocol,
             'host'      => $host,
             'port'      => $port,
             'base_path' => $base_path,
