@@ -67,9 +67,11 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script>
     (function(){
-      const CSS_CLASS_BAD_PAKKET = 'bad';
-      const CSS_CLASS_FINE_PAKKET = 'ok';
-      const CSS_CLASS_MISSING_PAKKET = 'missing';
+      const CSS_CLASS_PAKKET_BAD = 'bad';
+      const CSS_CLASS_PAKKET_FINE = 'ok';
+      const CSS_CLASS_PAKKET_MISSING = 'missing';
+      const CSS_CLASS_PAKKET_LATEST = 'latest';
+      const CSS_CLASS_PAKKET_NOT_LATEST = 'not-latest';
 
       // actual rendering packages call
       renderPackages();
@@ -204,22 +206,28 @@
         });
         // rendering queue
         renderQueue.forEach((val) => {
-          tableRow += `<td ${(val === '+' ? '' : ('class="' + CSS_CLASS_MISSING_PAKKET + '"'))}>${val}</td>`;
+          tableRow += `<td ${(val === '+' ? '' : ('class="' + CSS_CLASS_PAKKET_MISSING + '"'))}>${val}</td>`;
         });
         // figuring out if pakket is problematic + reflecting in <tr> css class
         problematicPakket = !!renderQueue.filter(val => val === '-').length;
         const latestVersion = config.versions_all[config.versions_all.length - 1];
         return `<tr ${config.version !== latestVersion ? 'style="display: none;"' : ''}
           id="pak--${config.name.replace(/[\/\.\:]/g,'')}-${config.version.replace(/[\/\.\:]/g,'')}"
-          class="${problematicPakket ? CSS_CLASS_BAD_PAKKET : CSS_CLASS_FINE_PAKKET}">${tableRow}</tr>`;
+          class="${problematicPakket ? CSS_CLASS_PAKKET_BAD : CSS_CLASS_PAKKET_FINE}
+                ${config.version === latestVersion ? CSS_CLASS_PAKKET_LATEST : CSS_CLASS_PAKKET_NOT_LATEST}">${tableRow}</tr>`;
       }
 
       $('#tbody').on('change', '.version select', function(e){
         const $target = $(e.target);
         const value = $target.val();
         const pakketName = $target.data('name');
+        const $currRow = $target.parents('tr');
+        const $select = $currRow.find('select');
         // hiding current row
-        $target.parents('tr').hide();
+        $currRow.hide();
+        // re-shaking select UI
+        const selectOptions = $select.html();
+        $select.html(selectOptions);
         // showing new one
         $(`#pak--${pakketName}-${value.replace(/[\/\.\:]/g,'')}`).show();
       });
@@ -227,11 +235,13 @@
       $('#only-problematic').on('change', function(){
         // as we have grouping now - we need to show mandatory
         // broken pakkets initially
-        $('.bad').show();
+        $(`.${CSS_CLASS_PAKKET_BAD}`).show();
         if ($(this).is(':checked')) {
-          $(`.${CSS_CLASS_FINE_PAKKET}`).hide();
+          $(`.${CSS_CLASS_PAKKET_FINE}`).hide();
         } else {
-          $(`.${CSS_CLASS_FINE_PAKKET}`).show();
+          $(`.${CSS_CLASS_PAKKET_FINE}`).show();
+          // and hiding not latest versions
+          $(`.${CSS_CLASS_PAKKET_NOT_LATEST}`).hide();
         }
       });
 
