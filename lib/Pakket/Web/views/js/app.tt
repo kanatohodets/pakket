@@ -1,4 +1,4 @@
-(function(){
+;(function(){
   const CSS_CLASS_PAKKET_BAD = 'bad';
   const CSS_CLASS_PAKKET_FINE = 'ok';
   const CSS_CLASS_PAKKET_MISSING = 'missing';

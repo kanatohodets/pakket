@@ -85,6 +85,23 @@ sub setup {
         template 'status';
     };
 
+    # manually defining static resources
+    # TODO: change extension, use some sort of auto-detection
+    get '/css/styles.css' => sub {
+      set content_type => 'text/css';
+      set auto_page => 1;
+      my $dirname = dirname(__FILE__);
+      set views => path($dirname, 'views');
+      template 'css/styles';
+    };
+    get '/js/app.js' => sub {
+      set content_type => 'text/javascript';
+      set auto_page => 1;
+      my $dirname = dirname(__FILE__);
+      set views => path($dirname, 'views');
+      template 'js/app';
+    };
+
 }
 
 1;
