@@ -81,7 +81,7 @@ sub install {
     @packages or return;
 
     if (!$self->check_packages_in_parcel_repo(\@packages)) {
-        return;
+        return 1;
     }
 
     my $installer_cache = {};
