@@ -6,19 +6,17 @@ use MooseX::StrictConstructor;
 use Path::Tiny          qw< path >;
 use Log::Any            qw< $log >;
 
+use Pakket::Downloader::ByUrl;
+
 with qw<
     Pakket::Role::HasConfig
     Pakket::Role::HasSpecRepo
     Pakket::Role::HasSourceRepo
+    Pakket::Role::CanApplyPatch
 >;
 
 has 'package' => (
     'is' => 'ro',
-);
-
-has 'source_archive' => (
-    'is'      => 'ro',
-    'isa'     => 'Maybe[Str]',
 );
 
 sub run {
@@ -49,20 +47,16 @@ sub add_source {
         return;
     }
 
-    if (!$self->source_archive) {
+    if (!$self->{package}{source}) {
         Carp::croak("Please specify --source-archive=<sources_file_name>");
     }
 
-    my $file = path($self->source_archive);
-    if (!$file->exists) {
-        Carp::croak("Archive with sources doesn't exist: ", $self->source_archive);
-    }
-
-    my $target = Path::Tiny->tempdir();
-    my $dir    = $self->unpack($target, $file);
+    my $download = Pakket::Downloader::ByUrl::create($self->{package}{name}, $self->{package}{source});
+    my $dir      = $download->to_dir;
+    $self->apply_patches($self->package, $dir);
 
     $log->debugf("Uploading %s into source repo from %s", $self->package->full_name, $dir);
-    $self->source_repo->store_package_source($self->package, $dir);
+    #$self->source_repo->store_package_source($self->package, $dir);
 }
 
 sub add_spec {
@@ -70,6 +64,7 @@ sub add_spec {
 
     $log->debugf("Creating spec for %s", $self->package->full_name);
 
+    $DB::single=1;
     my $package = Pakket::Package->new(
             'category' => $self->package->category,
             'name'     => $self->package->name,
@@ -78,25 +73,6 @@ sub add_spec {
         );
 
     $self->spec_repo->store_package_spec($package);
-}
-
-sub unpack {
-    my ($self, $target, $file) = @_;
-
-    my $archive = Archive::Any->new($file);
-
-    if ($archive->is_naughty) {
-        Carp::croak($log->critical("Suspicious module ($file)"));
-    }
-
-    $archive->extract($target);
-
-    my @files = $target->children();
-    if (@files == 1 && $files[0]->is_dir) {
-        return $files[0];
-    }
-
-    return $target;
 }
 
 __PACKAGE__->meta->make_immutable;
