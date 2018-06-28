@@ -72,7 +72,12 @@ has 'no_bootstrap' => (
     'default'   => 0,
 );
 
-has 'meta_spec' => (
+has 'source_archive' => (
+    'is'        => 'ro',
+    'isa'       => 'Maybe[Str]',
+);
+
+has 'custom_spec' => (
     'is'        => 'ro',
     'isa'       => 'Maybe[HashRef]',
 );
@@ -80,7 +85,7 @@ has 'meta_spec' => (
 sub _build_category {
     my $self = shift;
     $self->{'cpanfile'} and return 'perl';
-    return $self->{meta_spec}{category} if $self->{meta_spec};
+    $self->{'custom_spec'} and return $self->{'custom_spec'}{Package}{category};
     return $self->package->category;
 }
 
@@ -328,9 +333,9 @@ sub _gen_scaffolder_perl {
 
     if ( $self->cpanfile ) {
         $params{'cpanfile'} = $self->cpanfile;
-    } elsif ( $self->meta_spec ) {
-        my $name = $self->{meta_spec}{name};
-        $params{meta_spec}{$name} = $self->meta_spec;
+    } elsif ( $self->custom_spec ) {
+        my $name = $self->{custom_spec}{Package}{name};
+        $params{custom_spec}{$name} = $self->custom_spec;
     } else {
         $params{'module'} = $self->package;
     }
@@ -350,9 +355,13 @@ sub _gen_scaffolder_perl {
 sub _gen_scaffolder_native {
     my $self = shift;
 
+    my $name = $self->package->name;
+    my $version = $self->package->version;
+
     my %params = (
-        'package' => $self->package,
-        'config'  => $self->config,
+        'package'         => $self->package,
+        'source_archive'  => $self->source_archive,
+        'config'          => $self->config,
     );
 
     return Pakket::Scaffolder::Native->new(%params);

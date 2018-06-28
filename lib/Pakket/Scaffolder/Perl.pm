@@ -124,7 +124,7 @@ has 'dist_name' => (
     'default' => sub { +{} },
 );
 
-has 'meta_spec' => (
+has 'custom_spec' => (
     'is'  => 'ro',
     'isa' => 'HashRef',
 );
@@ -170,8 +170,8 @@ sub BUILDARGS {
     my $module   = delete $args{'module'};
     my $cpanfile = delete $args{'cpanfile'};
 
-    Carp::croak("Please provide either 'module' or 'cpanfile' or 'meta'")
-        unless $module or $cpanfile or $args{meta_spec};
+    Carp::croak("Please provide either 'module' or 'cpanfile' or 'custom_spec'")
+        unless $module or $cpanfile or $args{'custom_spec'};
 
     if ( $module ) {
         my $version = $module->version
@@ -186,8 +186,8 @@ sub BUILDARGS {
                 ( phase   => $phase   )x!! defined $phase,
                 ( type    => $type    )x!! defined $type,
             )->prereq_specs;
-    } elsif ( $args{meta_spec} ) {
-        my $package = (values %{$args{meta_spec}})[0]->{Package};
+    } elsif ( $args{custom_spec} ) {
+        my $package = (values %{$args{custom_spec}})[0]->{Package};
         $args{'modules'} =
             Pakket::Scaffolder::Perl::Module->new(
                 'name'    => $package->{name},
@@ -289,7 +289,7 @@ sub scaffold_package {
 sub apply_patches {
     my ($self, $package_name, $release_info, $sources) = @_;
 
-    if (my $pk = $self->{meta_spec}{$package_name}) {
+    if (my $pk = $self->{custom_spec}{$package_name}) {
         foreach my $patch (@{$pk->{patch}}) {
             unless ($patch =~ m/\//) {
                 $patch = path($pk->{path}, "patch/$package_name", $patch)->absolute;
@@ -319,7 +319,7 @@ sub get_release_info_for_package {
     }
 
     # if custom spec is provided - use it
-    if (my $pk = $self->{meta_spec}{$package_name}) {
+    if (my $pk = $self->{custom_spec}{$package_name}) {
         if ($pk->{Package}{source}) {
             return {
                 'distribution' => $package_name,
@@ -600,7 +600,7 @@ sub get_dist_name {
 sub update_release_info {
     my ( $self, $package_name, $release_info, $sources ) = @_;
 
-    if ( $self->is_local->{$package_name} or $self->{meta_spec}{$package_name}) {
+    if ( $self->is_local->{$package_name} or $self->custom_spec->{$package_name}) {
         my $prereqs;
         $self->load_pakket_json($sources);
         if (!$self->no_deps and ($sources->child('META.json')->is_file or $sources->child('META.yml')->is_file)) {
@@ -852,8 +852,8 @@ sub get_spec_for_package {
         },
     };
 
-    if ( $self->{meta_spec}{$package_name} ) {
-        $package_spec = $self->{meta_spec}{$package_name};
+    if ( $self->{custom_spec}{$package_name} ) {
+        $package_spec = $self->{custom_spec}{$package_name};
     }
 
     return $package_spec;

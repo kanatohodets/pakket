@@ -21,7 +21,6 @@ sub BUILD {
     my ($self) = @_;
 
     ($self->{url}, $self->{commit}) = split('#', $self->url);
-    (undef, $self->{url}) = split('git://', $self->url);
 }
 
 sub download_to_file {
